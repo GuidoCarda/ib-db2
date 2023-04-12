@@ -46,3 +46,11 @@ INSERT INTO cursos (nombre, cant_cred, carrera_id) VALUES
   ('programacion', 120, 2)
 
 ALTER TABLE alumnos MODIFY COLUMN sexo ENUM('M','F')
+
+
+ALTER TABLE alumnos ADD email VARCHAR(30)
+
+UPDATE alumnos SET email = concat(nombre, '@gmail.com') WHERE id = 1
+UPDATE cursos SET cant_cred = cant_cred + 20
+UPDATE cursos SET nombre = concat(nombre, ' TECNICO') WHERE nombre = 'INGLES' 
+
