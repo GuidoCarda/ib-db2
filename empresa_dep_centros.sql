@@ -162,4 +162,116 @@ SELECT id, nombre FROM empleados WHERE nombre like 'mateo%'
 
 SELECT id as numero, nombre FROM empleados WHERE nombre like 'mateo%' OR nombre like "juan%"
 
+-- 17 -  Mostrar los numeros, nombre y fecha de nacimiento de aquellos empleados nacidos entre el 2000 y el 2005
 
+SELECT id as numero, nombre, fecha_nacimiento FROM empleados WHERE YEAR(fecha_nacimiento) BETWEEN '2000' AND '2005'
+
+-- 18 - Mostrar los numeros, nombre de los empleados , junto al nombre su especialidad.
+
+SELECT empleados.id as numero, empleados.nombre, especialidades.nombre  
+FROM empleados, especialidades
+WHERE empleados.especialidad_id = especialidades.id
+
+SELECT empleados.id as numero, 
+       empleados.nombre, 
+       especialidades.nombre 
+FROM empleados
+INNER JOIN especialidades ON empleados.especialidad_id = especialidades.id
+
+
+-- 19 - Mostrar el numero y nombre del empleado, el nombre al departamento que pertenece y el nombre del centro al que pertenece ese departamento
+
+
+--v1
+SELECT empleados.id as nunero,
+       empleados.nombre as empleado,
+       departamentos.nombre as departamento,
+       centros.nombre as centro
+FROM empleados, departamentos, centros
+WHERE empleados.departamento_id = departamentos.id AND departamentos.centro_id = centros.id
+
+
+--v2
+SELECT empleados.id,
+       empleados.nombre,
+       departamentos.nombre,
+       centros.nombre
+FROM empleados
+INNER JOIN departamentos ON empleados.departamento_id = departamentos.id
+INNER JOIN centros ON departamentos.centro_id = centros.id
+
+-- 20 -  Hallar, por orden alfabético, los nombres de los departamentos cuyo tipo de director es en funciones.
+
+SELECT nombre from departamentos WHERE tipo_director = "F" ORDER BY nombre
+SELECT nombre from departamentos WHERE tipo_director like "F" ORDER BY nombre
+
+-- 21 - Obtener un listado telefónico de los empleados incluyendo nombre de empleado, número de empleado y número de teléfono. Por orden alfabético descendente.
+
+SELECT id as numero,
+       nombre,
+       telefono
+FROM empleados
+ORDER BY telefono DESC
+
+-- 22 - Obtener un listado telefónico de los empleados del departamento 120 incluyendo nombre de empleado, número de empleado y número de teléfono. Por orden alfabético ascendente
+
+SELECT nombre,
+       id as numero,
+       telefono       
+FROM empleados
+WHERE departamento_id = 120
+ORDER BY nombre ASC
+
+-- 23-  Hallar la comisión, nombre y salario de los empleados clasificados por salario, y dentro de salario por orden alfabético.
+
+SELECT comision, 
+       nombre, 
+       salario
+FROM empleados
+ORDER BY salario, nombre 
+
+-- 24-  Hallar la comisión, nombre y salario de los empleados que tienen tres hijos
+
+SELECT nombre,
+       comision,
+       salario
+FROM empleados
+WHERE nro_hijos = 3
+
+-- 25 Obtener salario y nombre de los empleados sin hijos y cuyo salario es mayor que 2000 y menor que 2500. 
+
+SELECT nombre, salario
+FROM empleados 
+WHERE nro_hijos = 0 AND salario BETWEEN 2000 AND 2500
+
+-- 26 -  Obtener los nombres de los departamentos donde trabajan empleados cuyo salario sea inferior a 1500
+
+SELECT departamentos.nombre
+FROM departamentos, empleados
+WHERE  empleados.departamento_id = departamentos.id AND empleados.salario < 1500 
+
+-- //  Operadores lógicos // --
+
+-- 27 - Mostrar los empleados cuyo salario sea mayor a 2000 y la comisión sea igual a 0
+SELECT nombre, salario, comision
+FROM empleados
+WHERE salario > 2000 AND comision = 0
+
+
+-- 28 - Mostrar los empleados cuyo salario sea mayor a 2000, pero que la comisión no sea igual a 0
+
+SELECT * 
+FROM empleados
+WHERE salario > 2000 AND comision != 0
+
+
+-- //  Operadores relacionales // --
+-- 29 - Suponiendo que en los próximos dos años el costo de vida va a aumentar un 8 % anual y que se suben los salarios solo un 2 % anual, hallar para los empleados tengan entre 1 y  4 hijos, su nombre y su sueldo actual,sueldo anual y sueldo para cada uno de los próximos dos años  (usar Between)
+
+SELECT nombre, 
+       salario, 
+       salario * 12 as salario_anual,
+       ROUND(salario * 12 * 1.02, 2) as salario_primer_año,
+       ROUND(salario * 12 * 1.02 * 1.02, 2) as salario_segundo_año
+FROM empleados
+WHERE nro_hijos BETWEEN 1 AND 4
