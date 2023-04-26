@@ -275,3 +275,48 @@ SELECT nombre,
        ROUND(salario * 12 * 1.02 * 1.02, 2) as salario_segundo_año
 FROM empleados
 WHERE nro_hijos BETWEEN 1 AND 4
+
+
+-- 30 Mostrar los numeros y nombres de los empleados cuyo nombre comienza con A
+
+SELECT id as numero, nombre 
+FROM empleados 
+WHERE nombre like "a%"
+
+-- 31 Mostrar los numeros y nombres de los empleados cuyos nombres sean Mateo, Julio, Luciano (usar in)
+
+SELECT id as numero,
+       nombre
+FROM empleados
+WHERE nombre in ("MATEO", 'Julio', 'Luciano')
+
+-- 32  En una campania de ayuda familiar se ha decidido dar a los empleados una paga extra de 600 para aquellos que tienen entre 1 y 3 hijos y un salario menor a 2000. Obtener por orden alfabetico para estos empelados: nombre, salario y salario total que van a cobrar incluyendo esta paga extra
+
+SELECT nombre, 
+       salario,
+       salario + 600
+FROM empleados
+WHERE (nro_hijos Between 1 AND 3) AND salario < 2000
+ORDER BY nombre 
+
+-- 33 Hallar el salario medio, minimo y maximo de los empleads de la empresa.
+
+SELECT MIN(salario) as minimo, 
+       ROUND(SUM(salario) / COUNT(salario),2) as promedio ,
+       MAX(salario) as maximo 
+FROM empleados
+
+-- 34 Hallar el numero de empleados de la empresa.
+SELECT COUNT(*) FROM empleados
+
+-- 35 Hallar el numero de empleados del departamento 120
+SELECT COUNT(*) 
+FROM empleados 
+WHERE (departamento_id = 120)
+
+-- 36 Hallar el numero de empleados de la empresa del departamento 120 y la suma de los salarios de esos empelados
+
+SELECT COUNT(*), SUM (salarios)
+FROM empleados
+WHERE departamento_id = 120
+
