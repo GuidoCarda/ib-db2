@@ -316,7 +316,55 @@ WHERE (departamento_id = 120)
 
 -- 36 Hallar el numero de empleados de la empresa del departamento 120 y la suma de los salarios de esos empelados
 
-SELECT COUNT(*), SUM (salarios)
+SELECT COUNT(*) as cant_empleados , SUM(salario) as total_salarios
 FROM empleados
 WHERE departamento_id = 120
+
+-- 37 Obtener por orden alfabetico los salarios y nombres de los empleados tales que su salario mas un 40% supera al salario maximo
+
+SELECT salario, nombre
+FROM empleados
+WHERE salario * 1.40 > (SELECT MAX(salario) from empleados)
+ORDER BY nombre
+
+-- 38. Hallar cuántos empleados hay en cada departamento.
+
+SELECT departamento_id, COUNT(*), 
+FROM empleados
+GROUP BY departamento_id
+
+-- 39. Hallar para cada departamento el salario medio, el mínimo y el máximo.
+
+SELECT departamento_id, 
+       MIN(salario) as minimo, 
+       MAX(salario) as maximo,
+       ROUND(SUM(salario)/ COUNT(salario),2 ) 
+FROM empleados
+GROUP BY departamento_id
+
+-- 40 - Mostrar la cantidad de empleados que pertenecen al centro “sede central” (tener en cuenta que hay que buscar los empleados que pertenezcan a departamentos de ese centro)
+
+SELECT COUNT(*), departamento_id
+FROM empleados
+INNER JOIN departamentos ON departamentos.id = empleados.departamento_id
+INNER JOIN centros ON centros.id = departamentos.centro_id
+WHERE centros.nombre like "%sede central%"
+
+-- Consultas con funciones
+-- 41 - Crear una campo en empleados que se llame adicionalSueldo, crearlo tipo decimal, con dos decimales. Cargarles números aleatorios entre 100,00 y 250,00.
+
+ALTER TABLE empleados ADD adicional_sueldo DECIMAL(5,2)
+UPDATE empleados SET adicional_sueldo = RAND()*(250.00 - 100.00) + 100.00
+
+-- 42 - Mostrar nombre empleados, salario y adicional ordenado por adicional. El adicional debe mostrarse sin decimales.
+
+SELECT nombre, salario, ROUND(adicional_sueldo, 0) 
+FROM empleados
+ORDER BY adicional_sueldo
+
+-- 43 - Igual al anterior pero con un único decimal.
+
+SELECT nombre, salario, ROUND(adicional_sueldo,1)
+FROM empleados
+ORDER BY adicional_sueldo
 
