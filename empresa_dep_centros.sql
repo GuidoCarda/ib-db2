@@ -368,3 +368,71 @@ SELECT nombre, salario, ROUND(adicional_sueldo,1)
 FROM empleados
 ORDER BY adicional_sueldo
 
+-- 44   - Mostrar nombre de empleados junto al sueldo anual del mismo, tener en cuenta que cada empleado ganará mensualmente el salario más la comisión, más el adicional.
+
+
+SELECT nombre, ROUND((salario + comision + adicional_sueldo) * 12, 2) as sueldo_anual 
+FROM empleados
+
+-- 46 - Si suponemos que el mes próximo los empleados ganarán un 15 % más en su salario, mostrar el nombre del empleado, el nombre de este mes, el salario de este mes,  el nombre del mes próximo y el salario del mes próximo
+
+
+SELECT nombre, 
+       MONTHNAME(CURDATE()) as mes_actual, 
+       salario as salario_actual,  
+       MONTHNAME(DATE_ADD(CURDATE(), INTERVAL 1 MONTH)) as proximo_mes, 
+       ROUND(salario * 1.15) as proximo_salario
+FROM empleados
+
+-- 47 -  Obtener los nombres de los empleados que cumplen años este mes.
+
+SELECT nombre
+FROM empleados
+WHERE MONTHNAME(fecha_nacimiento) = MONTHNAME(CURDATE())
+
+-- 48 - Obtener los nombres y fecha exacta de nacimiento de los empleados cuya fecha de nacimiento es anterior al año 2000.
+
+SELECT nombre, fecha_nacimiento
+FROM empleados
+WHERE YEAR(fecha_nacimiento) < 2000
+
+-- 49 - Obtener los empleados cuyo nacimiento fue en Lunes
+
+SELECT *
+FROM empleados
+WHERE WEEKDAY(fecha_nacimiento) = 1
+
+
+-- 50 - Obtener los empleados y su mes de incorporación siempre que esté entre los meses de Enero y Junio (ambos inclusive)
+
+SELECT nombre, fecha_incorporacion
+FROM empleados
+WHERE MONTH(fecha_incorporacion) BETWEEN 1 AND 6
+
+
+-- 51 - Obtener los nombres y dia, mes y año de la fecha exacta de incorporación de los empleados cuya fecha de incorporación a la empresa es anterior al año 2000. (mostrarlo con el formato de este ejemplo 25 de mayo de 1995)
+
+
+SELECT nombre,  
+       CONCAT( 
+        DAY(fecha_incorporacion), 
+        ' de ', 
+        MONTHNAME(fecha_incorporacion),
+        ' de ',
+        YEAR(fecha_incorporacion)
+       ) as fecha_incorporacion 
+FROM empleados
+WHERE YEAR(fecha_incorporacion) < 2000
+
+
+-- 52 - Cambiar los mails al servidor empresa.com.ar  (por ej si el mail es mateo@gmail.com, deberá quedar mateo@empresa.com.ar
+
+UPDATE empleados SET email = REPLACE(email, "@gmail.com", "@empresa.com.ar");
+
+-- 53 - Mostrar los nombres  de los empleados todos a mayusculas y los mails a minusculas
+SELECT UPPER(nombre), LOWER(email)
+FROM empleados
+
+UPDATE empleados SET email = REPLACE(email, ' ','' )
+
+
