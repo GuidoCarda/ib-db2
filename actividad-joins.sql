@@ -168,8 +168,52 @@ INNER JOIN VENTAS_DETALLE ON VENTAS.ID = VENTAS_DETALLE.VENTA_ID
 INNER JOIN PRODUCTOS ON VENTAS_DETALLE.PRODUCTOID = PRODUCTOS.ID
 GROUP BY PRODUCTOS.NOMBRE
 
+-- EXTRA Mostrar el id y fecha de aquella venta cuyo total es mayor, hacerlo con variable y con subconsulta
+
+-- Con variable
+SET @mayor = (SELECT MAX(TOTAL) FROM VENTAS);
+SELECT ID, FECHA FROM VENTAS WHERE TOTAL = @mayor
+
+
+-- Con subconsulta
+SELECT VENTAS.ID,
+       VENTAS.FECHA
+FROM VENTAS 
+WHERE TOTAL = (SELECT MAX(TOTAL) FROM VENTAS)
 
 -- 9 - Guardar en una variable el promedio de los totales de ventas. Mostrar aquellas
 -- ventas que son mayores al promedio, se debe ver el id de la venta, fecha y nombre
 -- del cliente (usar Join).
+
+SET @promedio_ventas = (SELECT AVG(VENTAS.TOTAL) FROM VENTAS)
+
+SELECT VENTAS.ID,
+       VENTAS.FECHA,
+       CLIENTES.NOMBRE
+FROM VENTAS
+INNER JOIN CLIENTES ON CLIENTES.ID = VENTAS.CLIENTEID
+WHERE VENTAS.TOTAL > @promedio_ventas
+
+-- 10 - Realizar la consulta anterior usando subconsulta
+SELECT VENTAS.ID,
+       VENTAS.FECHA,
+       CLIENTES.NOMBRE
+FROM VENTAS
+INNER JOIN CLIENTES ON CLIENTES.ID = VENTAS.CLIENTEID
+WHERE TOTAL > (SELECT AVG(TOTAL) FROM VENTAS)
+
+-- 11 - Guardar el id del producto del cual se vendió la mayor cantidad y mostrar el
+-- nombre de su proveedor. (Usar variables y join)
+
+
+SET @id_producto_mayor = (  
+  SELECT PRODUCTOID FROM VENTAS_DETALLE WHERE CANTIDAD = (SELECT MAX(CANTIDAD) FROM ventas_detalle)
+);
+
+SELECT PROVEEDORES.NOMBRE FROM productos
+INNER JOIN PROVEEDORES ON PROVEEDORES.IDPROV = PRODUCTOS.ID
+WHERE PRODUCTOS.ID = @id_producto_mayor
+
+
+
 
