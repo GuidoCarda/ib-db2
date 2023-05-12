@@ -205,14 +205,65 @@ WHERE TOTAL > (SELECT AVG(TOTAL) FROM VENTAS)
 -- 11 - Guardar el id del producto del cual se vendió la mayor cantidad y mostrar el
 -- nombre de su proveedor. (Usar variables y join)
 
+--V1
+-- SELECT @id_producto_mayor:= MAX(CANTIDAD) FROM ventas_detalle
 
+
+--V2
 SET @id_producto_mayor = (  
   SELECT PRODUCTOID FROM VENTAS_DETALLE WHERE CANTIDAD = (SELECT MAX(CANTIDAD) FROM ventas_detalle)
 );
 
-SELECT PROVEEDORES.NOMBRE FROM productos
+SELECT PROVEEDORES.NOMBRE as proveedor, PRODUCTOS.NOMBRE AS mas_vendido FROM productos
 INNER JOIN PROVEEDORES ON PROVEEDORES.IDPROV = PRODUCTOS.ID
 WHERE PRODUCTOS.ID = @id_producto_mayor
+
+
+-- SELECT SUM(CANTIDAD) FROM VENTAS_DETALLE GROUP BY PRODUCTOID
+
+
+-- Obtengo el producto mas vendido con su id (total ventas)
+-- SELECT prod 
+-- FROM (
+--   SELECT PRODUCTOID as prod,
+--          SUM(CANTIDAD) as total_vendido 
+--   FROM VENTAS_DETALLE 
+--   GROUP BY PRODUCTOID
+--     ORDER BY total_vendido DESC
+--   LIMIT 1 
+-- ) as tabla2
+
+SELECT @id_prod_mas_vendido := PRODUCTOID 
+FROM (
+  SELECT PRODUCTOID,
+         SUM(CANTIDAD) as total_vendido 
+  FROM VENTAS_DETALLE 
+  GROUP BY PRODUCTOID
+    ORDER BY total_vendido DESC
+  LIMIT 1 
+) as tabla2
+
+
+
+-- 12 - Mostrar quien es el cliente que compró último. Tener en cuenta que hay que
+-- buscar la última venta realizada. (usar subconsultas y join)
+
+--V1
+SELECT CLIENTES.NOMBRE FROM CLIENTES WHERE CLIENTES.ID = (SELECT CLIENTEID FROM VENTAS WHERE FECHA = (SELECT MAX(FECHA) FROM VENTAS) )
+
+--V2
+SELECT CLIENTES.NOMBRE 
+FROM CLIENTES
+INNER JOIN VENTAS ON VENTAS.CLIENTEID = CLIENTES.ID
+WHERE FECHA = (SELECT MAX(FECHA) FROM VENTAS)
+
+
+-- 13 - Mostrar el listado de productos que provee el proveedor, que tambien provee
+-- el producto teclado( o dicho de otra manera, cuáles productos provee el proveedor
+-- de los teclados). Usar Subconsultas y join
+
+SELECT PRODUCTOS.NOMBRE FROM PRODUCTOS WHERE IDPROV = (SELECT IDPROV FROM PRODUCTOS WHERE NOMBRE = 'teclado')
+
 
 
 
