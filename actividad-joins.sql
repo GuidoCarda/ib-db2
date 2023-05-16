@@ -245,6 +245,7 @@ FROM (
 
 
 
+
 -- 12 - Mostrar quien es el cliente que compró último. Tener en cuenta que hay que
 -- buscar la última venta realizada. (usar subconsultas y join)
 
@@ -265,6 +266,67 @@ WHERE FECHA = (SELECT MAX(FECHA) FROM VENTAS)
 SELECT PRODUCTOS.NOMBRE FROM PRODUCTOS WHERE IDPROV = (SELECT IDPROV FROM PRODUCTOS WHERE NOMBRE = 'teclado')
 
 
+-- SELECT @id_prod_mas_vendido := PRODUCTOID 
+-- FROM (
+--   SELECT PRODUCTOID,
+--          SUM(CANTIDAD) as total_vendido 
+--   FROM VENTAS_DETALLE 
+--   GROUP BY PRODUCTOID
+--   ORDER BY total_vendido DESC
+--   LIMIT 1 
+-- ) as tabla2
+
+-- SELECT IDPROV FROM PRODUCTOS WHERE PRODUCTOS.ID = @id_prod_mas_vendido
+
+
+-- MOstrar el nombre del proveedor que vendio mas productos acompañado con la cantidad vendida
+
+-- Obtengo totales vendidos por producto
+SELECT PRODUCTOID,
+        SUM(CANTIDAD) as total_vendido 
+FROM VENTAS_DETALLE 
+GROUP BY PRODUCTOID
+ORDER BY total_vendido DESC
+
+
+--En base a los totales vendidos por producto
+--Obtengo los id's de su proveedor y accedo a los datos del proveedor
+SELECT 
+  PROVEEDORES.IDPROV, 
+  PROVEEDORES.NOMBRE , 
+  SUM(total_ventas_producto) AS total_ventas 
+FROM (
+  SELECT PRODUCTOID,
+        SUM(CANTIDAD) as total_ventas_producto 
+  FROM VENTAS_DETALLE 
+  GROUP BY PRODUCTOID
+  ORDER BY total_ventas_producto DESC
+) as tabla2
+INNER JOIN PRODUCTOS ON PRODUCTOS.ID = PRODUCTOID 
+INNER JOIN PROVEEDORES ON PROVEEDORES.IDPROV = PRODUCTOS.IDPROV
+GROUP BY PRODUCTOS.IDPROV
+
+
+
+-- Una vez agrupados los totales de venta por proveedor
+-- Obtengo el proveedor que realizo mas ventas junto a la cantidad vendida
+SELECT IDPROV, NOMBRE, MAX(total_ventas) as total_vendido
+FROM (
+  SELECT 
+  PROVEEDORES.IDPROV, 
+  PROVEEDORES.NOMBRE , 
+  SUM(total_ventas_producto) AS total_ventas 
+FROM (
+  SELECT PRODUCTOID,
+        SUM(CANTIDAD) as total_ventas_producto 
+  FROM VENTAS_DETALLE 
+  GROUP BY PRODUCTOID
+  ORDER BY total_ventas_producto DESC
+) as tabla2
+INNER JOIN PRODUCTOS ON PRODUCTOS.ID = PRODUCTOID 
+INNER JOIN PROVEEDORES ON PROVEEDORES.IDPROV = PRODUCTOS.IDPROV
+GROUP BY PRODUCTOS.IDPROV
+) as tabla2
 
 
 
