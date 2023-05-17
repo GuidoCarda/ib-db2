@@ -310,6 +310,7 @@ GROUP BY PRODUCTOS.IDPROV
 
 -- Una vez agrupados los totales de venta por proveedor
 -- Obtengo el proveedor que realizo mas ventas junto a la cantidad vendida
+
 SELECT IDPROV, NOMBRE, MAX(total_ventas) as total_vendido
 FROM (
   SELECT 
