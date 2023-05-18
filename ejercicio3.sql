@@ -130,3 +130,139 @@ INSERT INTO compra_producto (id,producto_id, compra_id, cantidad, precio_unidad,
 (8,'AR-008', 3, 5,70.3,3),
 (9,'AR-008', 1, 5,170.3,1),
 (10,'11679', 1, 5,90.3,2);
+
+
+-- 1.Devuelve un listado con el código de oficina y la ciudad de la misma. 
+
+SELECT id, ciudad from oficinas
+
+-- 2. Devuelve un listado con la ciudad y el teléfono de las oficinas de Rosario. 
+
+SELECT id, ciudad FROM oficinas WHERE ciudad like 'ros%'
+
+
+-- 30 Devuelve un listado con el nombre y telefono de los empleados cuyo jefe tiene un código de jefe igual a 1. 
+
+
+SELECT nombre, tefono FROM empleados WHERE jefe_id = 1
+
+ALTER TABLE empleados CHANGE COLUMN tefono telefono VARCHAR(255)
+
+-- 4. Devuelve un listado con el nombre de los todos los clientes rosarinos.
+
+SELECT nombre FROM clientes WHERE ciudad like "ros%"
+
+-- 5. Devuelve un listado con el nombre de los todos los clientes cuyo límite de crédito esta entre 10 y 300.
+
+SELECT nombre FROM clientes WHERE limite_cred BETWEEN(10 AND 300)
+SELECT nombre, limite_cred FROM clientes WHERE limite_cred BETWEEN 10 AND 300
+
+-- 6. Mostrar los pedidos hechos en el  2008. 
+
+SELECT * FROM compras WHERE YEAR(fecha) = 2008 
+
+-- 7. Devuelve un listado con el código de pedido, nombre del cliente y fecha del pedido. (usar Join)
+
+SELECT compras.id, clientes.nombre, compras.fecha FROM compras
+INNER JOIN clientes ON clientes.id = compras.cliente_id
+
+
+-- 8.Mostrar los nombres de los  clientes que no realizaron compras
+
+SELECT clientes.nombre FROM compras
+RIGHT JOIN clientes ON compras.cliente_id = clientes.id
+WHERE compras.cliente_id IS null
+
+-- SELECT * FROM clientes
+-- WHERE (SELECT cliente_id FROM compras)
+
+
+-- 9. Devuelve un listado con el código de pedido, nombre del cliente, nombre del empleado  y fecha del pedido
+
+SELECT compras.id, clientes.nombre, empleados.nombre, compras.fecha FROM compras
+INNER JOIN clientes ON clientes.id = compras.cliente_id
+INNER JOIN empleados ON empleados.id = compras.empleado_id
+
+-- 10.  Devuelve un listado con el código de pedido, nombre del cliente, nombre del empleado  y fecha del pedido de los pedidos pendientes
+
+SELECT compras.id, clientes.nombre, empleados.nombre, compras.fecha FROM compras
+INNER JOIN clientes ON clientes.id = compras.cliente_id
+INNER JOIN empleados ON empleados.id = compras.empleado_id
+WHERE compras.estado like 'pendiente%'
+
+
+SELECT compras.id, 
+       clientes.nombre, 
+       empleados.nombre, 
+       compras.fecha
+FROM compras, clientes, empleados
+WHERE compras.cliente_id = clientes.id 
+      AND compras.empleado_id = empleados.id
+      AND compras.estado like 'pendiente%' 
+
+
+-- 11. Calcula el número de clientes que tiene la empresa. 
+
+SELECT COUNT(id) as cant_clientes from clientes
+
+-- 12 . Mostrar el nombre del cliente que tiene menor límite de crédito y el que tiene mayo límite de crédito
+
+SELECT nombre, limite_cred 
+FROM clientes 
+WHERE limite_cred = (SELECT min(limite_cred) from clientes) 
+      OR  limite_cred = (SELECT max(limite_cred) from clientes)
+
+
+-- 13 . Contar la cantidad de empleados de cada jefe
+
+SELECT jefe_id ,
+       count(id) as cant_empleados 
+FROM empleados 
+WHERE jefe_id IS NOT NULL 
+GROUP BY jefe_id 
+
+
+-- 14 . Contar la cantidad de empleados de cada jefe, mostrar el nombre del empleado
+
+SELECT cuenta_empleados.jefe_id, empleados.nombre , cant_empleados 
+FROM empleados, 
+    (
+    SELECT jefe_id, count(id) as cant_empleados
+    FROM empleados
+    WHERE jefe_id IS NOT NULL
+    GROUP BY jefe_id
+  ) as cuenta_empleados
+WHERE empleados.id = cuenta_empleados.jefe_id
+
+-- 15- Agregar a la tabla empleados el campo email.
+
+ALTER TABLE empleados add email varchar(255)
+
+-- 16 -Cargar  los mails de los empleados, se armarán automáticamente de la siguiente manera, nombreDelEMpleado@empresa.com.ar  
+
+UPDATE empleados SET email = CONCAT(nombre, '@empresa.com.ar')
+UPDATE empleados SET email = CONCAT(nombre, '@empresa.com.ar')
+
+
+-- 17 - Subir todos los limites de credito de los clientes en un 5 %
+
+UPDATE clientes SET limite_cred = limite_cred * 1.05
+
+
+-- 18 -Mostrar los id de pedidos y fechas de aquellos pedidos realizados entre el 2008 y el 2010
+
+SELECT id, fecha FROM compras WHERE YEAR(fecha) BETWEEN 2008 AND 2010
+
+-- 19 - Mostrar los id y nombres de los empleados cuyo nombre comienza con A.
+
+
+-- 20 - Mostrar los id y nombres de los empleados cuyo nombres sean Daniel  Dartes y Mariana Juarez(Usar IN)
+-- 20 - Mostrar los nombres de los empleados que son de alguna oficina de la ciudad de Rosario.
+-- 21 - Mostrar los nombres de los empleados de la empresa, junto al nombre de sus jefes.
+-- 22 -Mostrar los nombres de los empleados de la empresa, junto al nombre de sus jefes, pero solo los que son de la ciudad de Rosario o de Funes
+-- 23- Mostrar los nombres de los empleados de la empresa, junto al nombre de sus jefes, pero solo los que son de la ciudad de Rosario o de Funes y cuyo jefe sea "Marcos Perez"
+-- 24. Contar la cantidad de pedidos de cada estado
+-- 25 - Crear la tabla ciudad, que contenga codPostal y nombre de ciudad. Cargar con 4 ciudades. (Rosario, Funes, Roldan y Perez)
+--   26. Crear una tabla llamada ciudad que contenga codpostal y nombre de ciudad, cargar con 4 ciudades (Rosario, Funes, Roldan y perez)
+-- 26 modificar los campos ciudad de la tabla de clientes y de empleados, cambiandolo por codPostal
+-- 27 . Relacionar Ciudad con Clientes y ciudad con empleados
