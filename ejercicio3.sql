@@ -255,14 +255,111 @@ SELECT id, fecha FROM compras WHERE YEAR(fecha) BETWEEN 2008 AND 2010
 
 -- 19 - Mostrar los id y nombres de los empleados cuyo nombre comienza con A.
 
+SELECT  id, nombre FROM empleados WHERE nombre like 'm%'
 
 -- 20 - Mostrar los id y nombres de los empleados cuyo nombres sean Daniel  Dartes y Mariana Juarez(Usar IN)
+
+SELECT id, nombre FROM empleados WHERE nombre IN ("Daniel Dartes", "Juan Andes")
+
 -- 20 - Mostrar los nombres de los empleados que son de alguna oficina de la ciudad de Rosario.
+
+SELECT nombre FROM empleados WHERE empleados.oficina_id like '%Ros%'
+
+SELECT empleados.nombre, oficinas.ciudad FROM empleados  
+INNER JOIN oficinas ON oficinas.id = empleados.oficina_id
+WHERE oficinas.ciudad like '%Ros%'
+
 -- 21 - Mostrar los nombres de los empleados de la empresa, junto al nombre de sus jefes.
+
+
+--Get unique values
+SELECT DISTINCT jefe_id FROM empleados WHERE jefe_id IS NOT NULL
+
+
+--Id de jefe junto a su nombre 
+SELECT empleados.id, empleados.nombre 
+FROM empleados,  
+     (SELECT DISTINCT jefe_id as id 
+      FROM empleados 
+      WHERE jefe_id IS NOT NULL
+     ) as jefes
+WHERE empleados.id = jefes.id
+
+
+SELECT empleados.nombre as empleado, jefes.nombre as jefe
+FROM empleados,
+    (
+     SELECT empleados.id, empleados.nombre 
+     FROM empleados,  
+        ( 
+          SELECT DISTINCT jefe_id as id 
+          FROM empleados 
+          WHERE jefe_id IS NOT NULL
+        ) as jefes
+     WHERE empleados.id = jefes.id
+    ) as jefes
+WHERE empleados.jefe_id = jefes.id
+
 -- 22 -Mostrar los nombres de los empleados de la empresa, junto al nombre de sus jefes, pero solo los que son de la ciudad de Rosario o de Funes
+
+SELECT empleados.nombre as empleado, 
+       jefes.nombre as jefe,
+       empleados.ciudad as ciudad_empleado
+FROM empleados,
+    (
+     SELECT empleados.id, empleados.nombre 
+     FROM empleados,  
+        ( 
+          SELECT DISTINCT jefe_id as id 
+          FROM empleados 
+          WHERE jefe_id IS NOT NULL
+        ) as jefes
+     WHERE empleados.id = jefes.id
+    ) as jefes
+WHERE empleados.jefe_id = jefes.id AND empleados.ciudad IN ('Rosario', 'Funes')
+
+
 -- 23- Mostrar los nombres de los empleados de la empresa, junto al nombre de sus jefes, pero solo los que son de la ciudad de Rosario o de Funes y cuyo jefe sea "Marcos Perez"
+
+
+SELECT empleados.nombre as empleado, 
+       jefes.nombre as jefe,
+       empleados.ciudad as ciudad_empleado
+FROM empleados,
+    (
+     SELECT empleados.id, empleados.nombre 
+     FROM empleados,  
+        ( 
+          SELECT DISTINCT jefe_id as id 
+          FROM empleados 
+          WHERE jefe_id IS NOT NULL
+        ) as jefes
+     WHERE empleados.id = jefes.id
+    ) as jefes
+WHERE empleados.jefe_id = jefes.id 
+      AND empleados.ciudad IN ('Rosario', 'Funes')
+      AND jefes.nombre = "Marcos Perez"
+
+
+
 -- 24. Contar la cantidad de pedidos de cada estado
+
+SELECT estado, COUNT(id) as cantidad FROM compras GROUP BY estado
+
 -- 25 - Crear la tabla ciudad, que contenga codPostal y nombre de ciudad. Cargar con 4 ciudades. (Rosario, Funes, Roldan y Perez)
+
+CREATE TABLE ciudades(
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(255)
+)
+
 --   26. Crear una tabla llamada ciudad que contenga codpostal y nombre de ciudad, cargar con 4 ciudades (Rosario, Funes, Roldan y perez)
 -- 26 modificar los campos ciudad de la tabla de clientes y de empleados, cambiandolo por codPostal
 -- 27 . Relacionar Ciudad con Clientes y ciudad con empleados
+-- 28 - Cargar la tabla empleados según el siguiente criterio:
+-- 	Si la oficina  es   BCN-ROS será Rosario
+--       Si la oficina  es   BCN-Fun será Funes
+-- 	Etc
+-- 29 - Suponiendo que en los próximos dos meses el precio de los productos va a aumentar un 8 % mensual, mostrar para los productos que tienen un stock superior a 0, su precio actual, el del mes próximo y el de dentro de dos meses; Ordenado por el precio actual. 
+-- 30 -  Hallar el número de productos de gama Plantas aromáticas  y la suma de los precio de venta de todos ellos.
+
