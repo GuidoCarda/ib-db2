@@ -354,12 +354,58 @@ CREATE TABLE ciudades(
 )
 
 --   26. Crear una tabla llamada ciudad que contenga codpostal y nombre de ciudad, cargar con 4 ciudades (Rosario, Funes, Roldan y perez)
+
+CREATE TABLE ciudades (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  nombre VARCHAR(255),
+)
+
+INSERT INTO ciudades (nombre) VALUES ('Rosario'), ('Funes'), ('Roldan'),('Perez')
+
 -- 26 modificar los campos ciudad de la tabla de clientes y de empleados, cambiandolo por codPostal
+ALTER TABLE empleados CHANGE ciudad cod_postal INT
+ALTER TABLE empleados CHANGE ciudad cod_postal INT
+
+
 -- 27 . Relacionar Ciudad con Clientes y ciudad con empleados
+ALTER TABLE clientes 
+ADD FOREIGN KEY (cod_postal) REFERENCES ciudades(id)
+
+ALTER TABLE empleados
+ADD FOREIGN KEY (cod_postal) REFERENCES ciudades(id)
+
+
 -- 28 - Cargar la tabla empleados según el siguiente criterio:
 -- 	Si la oficina  es   BCN-ROS será Rosario
 --       Si la oficina  es   BCN-Fun será Funes
 -- 	Etc
+
+UPDATE empleados SET cod_postal = 1 WHERE oficina_id like '%ros%';
+UPDATE empleados SET cod_postal = 2 WHERE oficina_id like '%fun%';
+UPDATE empleados SET cod_postal = 3 WHERE oficina_id like '%rol%';
+
+
 -- 29 - Suponiendo que en los próximos dos meses el precio de los productos va a aumentar un 8 % mensual, mostrar para los productos que tienen un stock superior a 0, su precio actual, el del mes próximo y el de dentro de dos meses; Ordenado por el precio actual. 
+
+SELECT precio_venta, 
+       ROUND(precio_venta * 1.08, 2) as mes_proximo,
+       ROUND(precio_venta * 1.08 * 1.08,2) as dentro_dos_meses
+FROM productos
+WHERE stock > 0 
+ORDER BY precio_venta
+
+
 -- 30 -  Hallar el número de productos de gama Plantas aromáticas  y la suma de los precio de venta de todos ellos.
 
+SELECT COUNT(productos.id) as cantidad_productos, 
+       SUM(productos.precio_venta) as total_precio_venta 
+FROM productos
+INNER JOIN gamas ON productos.gama_id = gamas.id
+WHERE gamas.nombre like '%plantas aromaticas%'
+
+
+SELECT COUNT(productos.id) as cantidad_productos,
+       SUM(productos.precio_venta) as total_precio_venta
+FROM productos, gamas
+WHERE productos.gama_id = gamas.id 
+      AND gamas.nombre like '%plantas aromaticas%'
