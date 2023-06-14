@@ -23,6 +23,7 @@ CREATE TABLE modelos(
 CREATE TABLE articulos(
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(255),
+  costo DECIMAL(8,2),
   modelo_id INT,
   FOREIGN KEY (modelo_id) REFERENCES modelos(id)
 )
@@ -125,3 +126,40 @@ VALUES
   (3, 7);
 
 
+UPDATE articulos SET costo = FLOOR(RAND() * (1000 - 100 + 1) + 100);
+
+-- 1. Mostrar el listado de articulos solamente de aquellos artículos cuyo costo es mayor a $150 y menor a $300.
+
+SELECT *
+FROM articulos
+WHERE costo BETWEEN 150 AND 300
+
+-- 2. Mostrar id, nombre y sueldo de los empleados cuyo sueldo es mayor a el empleado cuyo nombre es Juan Perez.
+
+SELECT id, nombre, sueldo
+FROM empleados
+WHERE sueldo > (SELECT sueldo FROM empleados WHERE nombre like '%juan p%')
+
+-- 3. Mostrar el  id, nombre y sueldo del empleado que más cobra.
+
+SELECT nombre, sueldo from empleados order by sueldo desc limit 1
+
+SELECT nombre, sueldo
+FROM empleados
+WHERE sueldo = ( SELECT MAX(sueldo) from empleados ) 
+
+
+-- 4. Mostrar el  id, nombre y sueldo de los empleados cuyo salario supera al máximo salario de los empleados de la sucursal 1
+
+SELECT id, nombre, sueldo 
+FROM empleados
+WHERE sueldo > (SELECT MAX(SALARIO) FROM empleados WHERE sucursal_id = 1)
+
+SELECT MAX(SALARIO) FROM empleados WHERE sucursal_id = 1
+
+-- 5. Obtener los nombres y salarios de los empleados cuyo salario coincide con la comisión multiplicada por 10 de algún otro o la suya propia.
+-- 6. Obtener los nombres y el salario de los empleados de la sucursal 1 si en ella hay alguno que gane más de $130000
+-- 7. Mostrar el id, nombre y edad de los empleados cuyo sueldo es mayor a $200000 y ordenado por edad.
+-- 8. Mostrar el id, nombre de los articulos agrupados por tipos.
+-- 9. Mostrar el id, nombre de los articulos agrupados por tipos y modelos.
+-- 10. Mostrar el id, nombre y suma de los costos de los articulos agrupados por tipos y modelos.
