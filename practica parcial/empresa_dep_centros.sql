@@ -295,7 +295,6 @@ FROM empleados
 GROUP BY departamento_id 
 
 -- 39. Hallar para cada departamento el salario medio, el mínimo y el máximo.
-
 SELECT departamento_id, 
        MAX(salario), 
        MIN(salario), 
@@ -304,26 +303,78 @@ FROM empleados
 GROUP BY departamento_id
 
 -- 40 - Mostrar la cantidad de empleados que pertenecen al centro “sede central” (tener en cuenta que hay que buscar los empleados que pertenezcan a departamentos de ese centro)
-
 SELECT COUNT(empleados.id) nro_empleados_sede_central
 FROM empleados, departamentos, centros
 WHERE empleados.departamento_id = departamentos.id 
       AND departamentos.centro_id = centros.id 
       AND centros.nombre LIKE '%sede central%'
 
-
 -- Consultas con funciones
 -- 41 - Crear una campo en empleados que se llame adicionalSueldo, crearlo tipo decimal, con dos decimales. Cargarles números aleatorios entre 100,00 y 250,00.
+ALTER TABLE empleados ADD adicionalSueldo DECIMAL(5,2);
+UPDATE empleados SET adicionalSueldo = RAND() * (250 - 100) + 100;
+
 -- 42 - Mostrar nombre empleados, salario y adicional ordenado por adicional. El adicional debe mostrarse sin decimales.
+SELECT nombre, salario, ROUND(adicionalSueldo) 
+FROM empleados 
+ORDER BY adicionalSueldo
+
 -- 43 - Igual al anterior pero con un único decimal.
+SELECT nombre, salario, ROUND(adicionalSueldo, 1)
+FROM empleados 
+ORDER BY adicionalSueldo
+
+
 -- 44 - Mostrar nombre de empleados junto al sueldo anual del mismo, tener en cuenta que cada empleado ganará mensualmente el salario más la comisión, más el adicional.
+SELECT nombre, 
+       (salario + comision + adicionalSueldo) * 12 as salario_anual
+FROM empleados
 
 -- 45 -Mostrar el nombre del empleado, el nombre del mes actual Y el salario
+SELECT nombre, MONTHNAME(NOW()) AS mes_actual ,salario
+FROM empleados
+
 -- 46 - Si suponemos que el mes próximo los empleados ganarán un 15 % más en su salario, mostrar el nombre del empleado, el nombre de este mes, el salario de este mes,  el nombre del mes próximo y el salario del mes próximo
+SELECT nombre, 
+       MONTHNAME(NOW()) as mes_actual,
+       salario as salario_actual,
+       MONTHNAME(ADDDATE(NOW(), INTERVAL 1 MONTH)) as mes_proximo,
+       ROUND(salario * 1.15, 2) as salario_mes_proximo
+FROM empleados
+
 -- 47 -  Obtener los nombres de los empleados que cumplen años este mes.
+SELECT nombre, fecha_nacimiento
+FROM empleados
+WHERE MONTH(fecha_nacimiento) = MONTH(NOW())
+
 -- 48 - Obtener los nombres y fecha exacta de nacimiento de los empleados cuya fecha de nacimiento es anterior al año 2000.
+SELECT nombre, fecha_nacimiento
+FROM empleados 
+WHERE YEAR(fecha_nacimiento) < 2000
+
 -- 49 - Obtener los empleados cuyo nacimiento fue en Lunes
+SELECT * 
+FROM empleados
+WHERE WEEKDAY(fecha_nacimiento) = 1
+-- 1 Sunday, 2-Monday ...
+
 -- 50 - Obtener los empleados y su mes de incorporación siempre que esté entre los meses de Enero y Junio (ambos inclusive)
+SELECT *, MONTHNAME(fecha_incorporacion)
+FROM empleados 
+WHERE MONTH(fecha_incorporacion) BETWEEN 1 AND 6
+
 -- 51 - Obtener los nombres y dia, mes y año de la fecha exacta de incorporación de los empleados cuya fecha de incorporación a la empresa es anterior al año 2000. (mostrarlo con el formato de este ejemplo 25 de mayo de 1995)
+SELECT nombre, 
+       DAY(fecha_incorporacion) as dia_incorporacion, 
+       MONTHNAME(fecha_incorporacion) as mes_incorporacion,
+       YEAR(fecha_incorporacion) as anio_incorporacion
+FROM empleados 
+WHERE YEAR(fecha_incorporacion) < 2000
+
 -- 52 - Cambiar los mails al servidor empresa.com.ar  (por ej si el mail es mateo@gmail.com, deberá quedar mateo@empresa.com.ar
+UPDATE empleados SET email = CONCAT(LOWER(REPLACE(nombre, ' ', '')),'@mpresa.com.ar')
+UPDATE empleados SET email = REPLACE(email, '@mpresa.com.ar', '@test.com')
+
+
 -- 53 - Mostrar los nombres  de los empleados todos a mayusculas y los mails a minusculas
+SELECT UPPER(nombre), LOWER(email) FROM empleados
