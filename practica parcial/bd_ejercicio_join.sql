@@ -110,26 +110,144 @@ LEFT JOIN clientes ON ventas.cliente_id = clientes.id
 
 
 -- 3 - Agregar el proveedor número 3 que se llama Natalia Perez.
+INSERT INTO proveedores (id, nombre) values (3, 'NATALIA PEREZ')  
+
 -- Agregar dos productos nuevos, (6,'RR-0006','CPU','UNO DE LOS MEJORES CPU
 -- GAMER',1),(7,'TT-0007','teclado','UNO DE LOS MEJORES TECLADOS',2) ;
+INSERT INTO productos (id,codigo,nombre,descripcion,proveedor_id)
+VALUES (6,'RR-0006','CPU','UNO DE LOS MEJORES CPU -- GAMER',1),
+       (7,'TT-0007','teclado','UNO DE LOS MEJORES TECLADOS',2) ;
+
+
 -- 4- Mostrar todos los productos con su nombre y el nombre del proveedor, solo
 -- mostrar los productos que solo tengan proveedores
+SELECT productos.nombre as producto,
+       proveedores.nombre as proveedor
+FROM productos 
+LEFT JOIN proveedores ON productos.proveedor_id = proveedores.id
+
+SELECT productos.nombre as producto,
+       proveedores.nombre as proveedor
+FROM productos, proveedores 
+WHERE productos.proveedor_id = proveedores.id
+
+
+
 -- 5- Mostrar los nombres de todos los proveedores junto a los nombres de los
 -- productos que proveen cada uno
+
+SELECT proveedores.nombre, productos.nombre
+FROM proveedores
+RIGHT JOIN productos ON proveedores.id = productos.proveedor_id
+
 -- 6- Mostrar los nombres de todos los proveedores y la cantidad de productos que
 -- proveen cada uno
+
+SELECT proveedores.nombre,
+       COUNT(productos.id)
+FROM proveedores
+INNER JOIN productos ON proveedores.id = productos.proveedor_id
+GROUP BY proveedores.id
+
+
 -- 7 - Mostrar por producto, la cantidad total que se vendió en el total de ventas (aún
 -- los que no se vendieron)
+
+SELECT productos.nombre, SUM(ventas_detalle.cantidad)
+FROM productos
+LEFT JOIN ventas_detalle ON productos.id = ventas_detalle.producto_id
+GROUP BY productos.id
+
+
 -- 8 - Detalle de cada una de las ventas (cuantos y que productos fueron registrados
 -- en cada venta)
+
+SELECT ventas_detalle.venta_id as venta, 
+       productos.nombre as producto, 
+       ventas_detalle.cantidad as cantidad
+FROM ventas_detalle
+INNER JOIN productos ON ventas_detalle.producto_id = productos.id
+
+-- EXTRA Mostrar el id y fecha de aquella venta cuyo total es mayor, hacerlo con variable y con subconsulta
+SELECT id, fecha
+FROM ventas
+WHERE total = (SELECT MAX(total) FROM VENTAS)
+
+SET @max := (SELECT MAX(total) from ventas);
+SELECT id, fecha
+FROM ventas
+WHERE total = @max;
+
 -- 9 - Guardar en una variable el promedio de los totales de ventas. Mostrar aquellas
 -- ventas que son mayores al promedio, se debe ver el id de la venta, fecha y nombre
 -- del cliente (usar Join).
+
+
+SET @promedio = (SELECT ROUND(AVG(total)) from ventas);
+
+SELECT ventas.id, ventas.fecha, clientes.nombre, ventas.total
+FROM ventas
+INNER JOIN clientes ON ventas.cliente_id = clientes.id
+WHERE total > @promedio
+
+
 -- 10 - Realizar la consulta anterior usando subconsulta
+SELECT ventas.id, ventas.fecha, clientes.nombre, ventas.total
+FROM ventas
+INNER JOIN clientes ON ventas.cliente_id = clientes.id
+WHERE total > (SELECT ROUND(AVG(total)) FROM ventas)
+
 -- 11 - Guardar el id del producto del cual se vendió la mayor cantidad y mostrar el
 -- nombre de su proveedor. (Usar variables y join)
+
+SET @id_producto_mayor := SELECT producto_id FROM ventas_detalle WHERE cantidad = (SELECT MAX(cantidad) FROM ventas_detalle);
+
+SELECT proveedores.nombre
+FROM proveedores
+INNER JOIN productos ON proveedores.id = productos.proveedor_id
+WHERE productos.id = @id_producto_mayor
+
+
+SELECT @id_mas_vendido := producto_id 
+FROM (
+  SELECT producto_id ,
+         SUM(cantidad) as total_vendido
+  FROM ventas_detalle
+  GROUP BY producto_id
+  ORDER BY total_vendido
+  LIMIT 1 
+) as ventas_acumuladas
+
+SELECT nombre FROM productos WHERE id = @id_mas_vendido 
+
+-- Mostrar mas vendido mas la cantidad
+
+SELECT ventas_acumuladas.producto_id, productos.nombre, ventas_acumuladas.total_vendido
+FROM (
+  SELECT producto_id ,
+         SUM(cantidad) as total_vendido
+  FROM ventas_detalle
+  GROUP BY producto_id
+  ORDER BY total_vendido
+  LIMIT 1 
+) as ventas_acumuladas
+INNER JOIN productos on ventas_acumuladas.producto_id = productos.id
+
+
 -- 12 - Mostrar quien es el cliente que compró último. Tener en cuenta que hay que
 -- buscar la última venta realizada. (usar subconsultas y join)
+
+SELECT ventas.id, ventas.fecha,clientes.nombre
+FROM ventas
+INNER JOIN clientes ON ventas.cliente_id = clientes.id
+WHERE ventas.fecha = (SELECT MAX (ventas.fecha) from ventas)
+
+
 -- 13 - Mostrar el listado de productos que provee el proveedor, que tambien provee
 -- el producto teclado( o dicho de otra manera, cuáles productos provee el proveedor
--- de los teclados). Usar Subconsultas y join
+-- de los teclados). Usar Subconsultas y join`
+
+SELECT proveedor.id, productos.nombre
+FROM productos
+INNER JOIN proveedores ON productos.proveedor_id = proveedores.id
+WHERE proveedores.id = (SELECT proveedor_id FROM productos WHERE nombre like '%teclado%')
