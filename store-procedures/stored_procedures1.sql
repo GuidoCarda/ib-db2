@@ -121,35 +121,52 @@ SELECT @medal4;
 
 -- 7 - Crear la siguientes tabla
 
--- create table libros(
---   codigo int auto_increment,
---   titulo varchar(40),
---   autor varchar(30),
---   editorial varchar(20),
---   precio decimal(5,2),
---   primary key(codigo) 
---  );
+CREATE TABLE libros(
+  codigo INT auto_increment,
+  titulo VARCHAR(40),
+  autor VARCHAR(30),
+  editorial VARCHAR(20),
+  precio DECIMAL(5,2),
+  PRIMARY KEY(codigo) 
+);
 
---  insert into libros (titulo,autor,editorial,precio) 
---   values ('Uno','Richard Bach','Planeta',15);
---  insert into libros (titulo,autor,editorial,precio) 
---   values ('Ilusiones','Richard Bach','Planeta',12);
---  insert into libros (titulo,autor,editorial,precio) 
---   values ('El aleph','Borges','Emece',25);
---  insert into libros (titulo,autor,editorial,precio) 
---   values ('Aprenda PHP','Mario Molina','Nuevo siglo',50);
---  insert into libros (titulo,autor,editorial,precio) 
---   values ('Matematica estas ahi','Paenza','Nuevo siglo',18);
---  insert into libros (titulo,autor,editorial,precio) 
---   values ('Puente al infinito','Bach Richard','Sudamericana',14);
---  insert into libros (titulo,autor,editorial,precio) 
---   values ('Antología','J. L. Borges','Paidos',24);
---  insert into libros (titulo,autor,editorial,precio) 
---   values ('Java en 10 minutos','Mario Molina','Siglo XXI',45);
---  insert into libros (titulo,autor,editorial,precio) 
---   values ('Cervantes y el quijote','Borges- Casares','Planeta',34);
+ insert into libros (titulo,autor,editorial,precio) 
+  values ('Uno','Richard Bach','Planeta',15);
+ insert into libros (titulo,autor,editorial,precio) 
+  values ('Ilusiones','Richard Bach','Planeta',12);
+ insert into libros (titulo,autor,editorial,precio) 
+  values ('El aleph','Borges','Emece',25);
+ insert into libros (titulo,autor,editorial,precio) 
+  values ('Aprenda PHP','Mario Molina','Nuevo siglo',50);
+ insert into libros (titulo,autor,editorial,precio) 
+  values ('Matematica estas ahi','Paenza','Nuevo siglo',18);
+ insert into libros (titulo,autor,editorial,precio) 
+  values ('Puente al infinito','Bach Richard','Sudamericana',14);
+ insert into libros (titulo,autor,editorial,precio) 
+  values ('Antología','J. L. Borges','Paidos',24);
+ insert into libros (titulo,autor,editorial,precio) 
+  values ('Java en 10 minutos','Mario Molina','Siglo XXI',45);
+ insert into libros (titulo,autor,editorial,precio) 
+  values ('Cervantes y el quijote','Borges- Casares','Planeta',34);
 
 -- 9 - Crear procedimiento que muestre la cantidad de libros que hay en la bd
+
+-- v1
+DELIMITER //
+CREATE PROCEDURE get_book_count()
+BEGIN
+  SELECT COUNT(codigo) as cantidad_libros FROM libros;
+END
+//
+DELIMITER ;
+
+-- v2 ( como es una unica linea no es necesario los delimiters y el begin & end)
+CREATE PROCEDURE get_book_count_v2()
+SELECT COUNT(codigo) as cantidad_libros FROM libros;
+
+CALL get_book_count();
+CALL get_book_count_v2();
+
 -- 10 - Crear procedimiento que muestre la cantidad de libros de la editorial X que hay en la bd.(Pasarle el nombre de una editorial)
 -- 11 - Recorrer la tabla y buscar la cantidad de veces que aparecen libros del Editorial X, mostrar 0 sino encuentra ninguno, 1 si encuentra 1 y 2 si encuentra más de 1.(no usar Count)
 -- 12 - Crear un stored procedure que recibe el nombre de una editorial y luego aumente en un 10% los precios de los libros de tal editorial:
