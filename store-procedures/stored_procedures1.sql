@@ -190,21 +190,122 @@ BEGIN
   SELECT * FROM libros WHERE editorial = query;
   SET books_found = FOUND_ROWS();
 
+  CASE  
+    WHEN books_found > 1 THEN SELECT 2 as resultado;
+    WHEN books_found = 1 THEN SELECT 1 as resultado;
+    ELSE SELECT 0 as resultado;
+  END CASE;
+
+END
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE get_book_count_summary_by_editorial_v2(IN query VARCHAR(255))
+BEGIN
+  DECLARE books_found INT;
+  SELECT * FROM libros WHERE editorial = query;
+  SET books_found = FOUND_ROWS();
+
+  IF (books_found > 1) THEN
+    SELECT 2 as resultado;
+  ELSEIF (books_found = 1) THEN 
+    SELECT 1 as resultado;
+  ELSE 
+    SELECT 0 as resultado;
+  END IF;
+END
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE get_book_count_summary_by_editorial_v3(IN editorialQuery VARCHAR(255))
+BEGIN
+  DECLARE books_found INT;
   DECLARE result INT;
 
-  CASE  
-    WHEN books_found > 1 THEN SET result = 2;
-    WHEN books_found = 1 THEN SET result = 1;
-    ELSE SET result = 0;
-  END CASE;
+  SELECT * FROM libros WHERE editorial = editorialQuery;
+  SET books_found = FOUND_ROWS();
+
+  IF (books_found > 1) THEN
+    SET result = 2;
+  ELSEIF (books_found = 1) THEN 
+    SET result = 1;
+  ELSE 
+    SET result = 0;
+  END IF;
 
   SELECT result;
 END
 //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE get_book_count_summary_by_editorial_v4(IN editorialQuery VARCHAR(255), OUT result INT)
+BEGIN
+  DECLARE books_found INT;
+  SELECT * FROM libros WHERE editorial = editorialQuery;
+  SET books_found = FOUND_ROWS();
+
+  IF (books_found > 1) THEN
+    SELECT 2 INTO result;
+  ELSEIF (books_found = 1) THEN 
+    SELECT 1 INTO result;
+  ELSE 
+    SELECT 0 INTO result;
+  END IF;
+END
+//
+DELIMITER ;
+
+
+
 -- 12 - Crear un stored procedure que recibe el nombre de una editorial y luego aumente en un 10% los precios de los libros de tal editorial:
--- 13 - Crear un procedimiento que recibe 2 parámetros, el nombre de una editorial y el valor de incremento:
--- 14 - Crear un procedimiento almacenado que ingrese un nuevo libro en la tabla "libros":
+
+DELIMITER //
+CREATE PROCEDURE update_books_price_by_editorial(IN editorialQuery VARCHAR(255))
+BEGIN 
+  UPDATE libros SET precio = precio * 1.10 WHERE editorial = editorialQuery;
+END
+//
+DELIMITER ;
+-- 13 - Crear un procedimiento que recibe 2 parámetros, el nombre de una editorial y el valor de incremento:`
+
+DELIMITER //
+CREATE PROCEDURE update_books_price_by_editorial_with_value(IN editorialQuery VARCHAR(255), IN increment DOUBLE)
+BEGIN
+  UPDATE libros SET precio = precio * increment WHERE editorial = editorialQuery;
+END
+//
+DELIMITER ;
+-- 14 - Crear un procedimiento almacenado que ingrese un nuevo libro en la tabla "libros":`
+DELIMITER //
+CREATE PROCEDURE add_book(
+  IN titulo VARCHAR(255),
+  IN precio DOUBLE,
+  IN editorial VARCHAR(255),
+  IN autor VARCHAR(255)
+)
+BEGIN
+  INSERT INTO libros (titulo, precio, editorial,autor) VALUES (titulo, precio, editorial,autor);
+END
+//
+DELIMITER ;
+
+call add_book("Atomic habits", 50.25, "Planeta", "James Clear");
+
 -- 15 - Crear un procedimiento almacenado que recibe el nombre de un autor  y nos retorna la suma de precios de todos sus libros y su promedio
+
+DELIMITER //
+CREATE PROCEDURE get_author_total_prices_and_average(in autorQuery VARCHAR(255))
+BEGIN 
+  SELECT SUM(precio) AS total_precios,
+         ROUND(AVG(precio),2) AS promedio
+  FROM libros 
+  WHERE autor = autorQuery;
+END
+//
+DELIMITER ;
+
+call get_author_total_prices_and_average("Richard Bach");
 
