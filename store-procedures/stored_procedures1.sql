@@ -3,7 +3,7 @@ CREATE DATABASE stored_procedures1
 -- 1 - Crear un procedimiento almacenado que ingresando dos números, nos devuelva el promedio de ambos.
 -- You can either return a value
 CREATE PROCEDURE average(in num1 int, in num2 int, out result int)
-SET result = (num1 + num2) / 2
+SET result = (num1 + num2) / 2;
 
 CALL average(5,123, @result);
 SELECT * FROM @result;
@@ -23,7 +23,7 @@ call average2(12,5);
 
 -- 2 - Crear un procedimiento almacenado que reciba un parámetro de entrada/salida con un entero y lo retorne incrementado en 1:
 CREATE PROCEDURE increment_by_one(in num int, out result int)
-SET result = num + 1
+SET result = num + 1;
 
 call increment_by_one(10, @result);
 SELECT @result;
@@ -168,7 +168,41 @@ CALL get_book_count();
 CALL get_book_count_v2();
 
 -- 10 - Crear procedimiento que muestre la cantidad de libros de la editorial X que hay en la bd.(Pasarle el nombre de una editorial)
+DELIMITER //
+CREATE PROCEDURE get_book_count_by_editorial(in query varchar(255))
+BEGIN
+  DECLARE book_count INT;
+  SELECT COUNT(*) INTO book_count FROM libros WHERE editorial = query;
+  SELECT book_count AS cantidad_libros;
+END
+//
+DELIMITER ;
+
+CALL get_book_count_by_editorial("Planeta"); -- > 3
+
 -- 11 - Recorrer la tabla y buscar la cantidad de veces que aparecen libros del Editorial X, mostrar 0 sino encuentra ninguno, 1 si encuentra 1 y 2 si encuentra más de 1.(no usar Count)
+
+
+DELIMITER //
+CREATE PROCEDURE get_book_count_summary_by_editorial(IN query VARCHAR(255))
+BEGIN
+  DECLARE books_found INT;
+  SELECT * FROM libros WHERE editorial = query;
+  SET books_found = FOUND_ROWS();
+
+  DECLARE result INT;
+
+  CASE  
+    WHEN books_found > 1 THEN SET result = 2;
+    WHEN books_found = 1 THEN SET result = 1;
+    ELSE SET result = 0;
+  END CASE;
+
+  SELECT result;
+END
+//
+DELIMITER ;
+
 -- 12 - Crear un stored procedure que recibe el nombre de una editorial y luego aumente en un 10% los precios de los libros de tal editorial:
 -- 13 - Crear un procedimiento que recibe 2 parámetros, el nombre de una editorial y el valor de incremento:
 -- 14 - Crear un procedimiento almacenado que ingrese un nuevo libro en la tabla "libros":
