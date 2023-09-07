@@ -92,9 +92,78 @@ END
 DELIMITER;
 
 -- 5 - Modificar la fecha de un alumno cuyo codigo se pasa como parámetro
+DELIMITER //
+CREATE PROCEDURE modificar_fecha_alumno(
+  in alumno_id int, 
+  in nueva_fecha_nac date
+)
+BEGIN
+  UPDATE alumno SET fecha_nac = nueva_fecha_nac WHERE id = alumno_id;
+END
+//
+DELIMITER ;
+
 -- 6 - Mostrar la edad de un profesor o alumno cuyo codigo se pasa como parámetro
-    
+DELIMITER //
+CREATE PROCEDURE obtener_edad(
+  in tabla VARCHAR(30),
+  in registro_id int
+)
+BEGIN
+  IF TABLA = 'alumno' THEN
+    SELECT YEAR(FROM_DAYS(DATEDIFF(NOW(), fecha_nac))) as Edad FROM alumno WHERE id = registro_id;
+  ELSEIF TABLA = 'profesor' THEN
+    SELECT YEAR(FROM_DAYS(DATEDIFF(NOW(), fecha_nac))) as Edad FROM profesor WHERE id = registro_id;
+  END IF;
+END
+//
+DELIMITER ;
+
+-- DATEDIF diference between dates in days
+-- FROM_DAYS returns a date from a days count
+-- YEAR returns the year of the date
+
+-- YEAR(FROM_DAYS(DATEDIFF(NOW(), campo)))
+
 -- 7 - Eliminar los alumnos cuyos codigos esten comprendidos entre dos números pasados como parámetros (por ejemplo los alumnos cuyo codigo tienen entre 3 y 5, o sea 3,4 y 5)
+
+DELIMITER //
+CREATE PROCEDURE eliminar_alumnos(
+  in inicio int,
+  in final int
+) 
+BEGIN
+  DELETE FROM alumno WHERE id BETWEEN inicio AND final;
+END
+//
+DELIMITER ;
+
 -- 8 - Crear un procedimiento almacenado que cargue datos de nuevos alumnos. Cargar como mínimo 3 alumnos
+DELIMITER //
+CREATE PROCEDURE cargar_alumno(
+  in nombre VARCHAR(20),
+  in apellido VARCHAR(20),
+  in fecha_nac DATE
+) 
+BEGIN
+  IF  nombre IS NOT NULL 
+      AND apellido IS NOT NULL 
+      AND  fecha_nac IS NOT NULL  
+  THEN
+    INSERT INTO alumno (nombre, apellido, fecha_nac) VALUES (nombre, apellido, fecha_nac);
+  END IF;
+END
+//
+DELIMITER ;
+
+CALL cargar_alumno('Guido','Cardarelli', '2001/02/05');
+
+-- CREATE TABLE alumno (
+--   id INT PRIMARY KEY AUTO_INCREMENT,
+--   nombre VARCHAR(20) NOT NULL,
+--   apellido VARCHAR(20) NOT NULL,
+--   fecha_nac  DATE,
+--   edad INT 
+-- );
 
 -- 9 - calcular las edades de los alumnos y los docentes y cargarlas en la bd
