@@ -157,6 +157,8 @@ END
 DELIMITER ;
 
 CALL cargar_alumno('Guido','Cardarelli', '2001/02/05');
+CALL cargar_alumno('Joaquin','Vesco Aparicio', '2001/02/05');
+CALL cargar_alumno('Mateo','Salguero', '2001/02/05');
 
 -- CREATE TABLE alumno (
 --   id INT PRIMARY KEY AUTO_INCREMENT,
@@ -167,3 +169,16 @@ CALL cargar_alumno('Guido','Cardarelli', '2001/02/05');
 -- );
 
 -- 9 - calcular las edades de los alumnos y los docentes y cargarlas en la bd
+
+DELIMITER //
+CREATE PROCEDURE cargar_edades() 
+BEGIN 
+  UPDATE alumno SET edad = YEAR(FROM_DAYS(DATEDIFF(NOW(), fecha_nac)));
+  UPDATE profesor SET edad = YEAR(FROM_DAYS(DATEDIFF(NOW(), fecha_nac)));
+END
+//
+DELIMITER ;
+
+
+
+
