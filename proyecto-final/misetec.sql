@@ -3,13 +3,13 @@ USE misetec;
 
 CREATE TABLE tipo_servicio(
   id int primary key auto_increment,
-  denominacion varchar(50),
+  denominacion varchar(50) NOT NULL,
   descripcion varchar(255)
 );
 
 CREATE TABLE estado_orden(
   id int primary key auto_increment,
-  denominacion varchar(30)
+  denominacion varchar(30) NOT NULL
 );
 
 CREATE TABLE equipo(
@@ -17,12 +17,12 @@ CREATE TABLE equipo(
   marca varchar(50),
   modelo varchar(50),
   tipo varchar(50),
-  nro_serie varchar(50)
+  nro_serie varchar(50) 
 );
 
 CREATE TABLE orden(
   id int primary key auto_increment,
-  fecha_creacion date,
+  fecha_creacion date NOT NULL,
   fecha_finalizacion date,
   falla_equipo varchar(255),
   accesorios varchar(255),
@@ -41,7 +41,7 @@ CREATE TABLE cliente(
   id int primary key auto_increment,
   nombre varchar(50),
   apellido varchar(50),
-  email varchar(50),
+  email varchar(50) NOT NULL,
   direccion varchar(50),
   telefono varchar(20),
   codigo_postal varchar(10)
