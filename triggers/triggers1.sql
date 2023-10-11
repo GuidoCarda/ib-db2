@@ -115,6 +115,7 @@ BEGIN
 END;
 //
 DELIMITER ;
+
 -- Probar
 insert into ventas(codigolibro, precio, cantidad) values(1, 15, 4);
 
@@ -122,10 +123,13 @@ insert into ventas(codigolibro, precio, cantidad) values(1, 15, 4);
 
 
 DELIMITER //
-CREATE TRIGGER tr_actualizar_a_precio_venta AFTER INSERT ON ventas AFTER EACH ROW
+CREATE TRIGGER tr_actualizar_a_precio_venta AFTER INSERT ON ventas FOR EACH ROW
 BEGIN
   UPDATE libros SET stock = stock - new.cantidad WHERE codigo = new.codigoLibro;
   UPDATE libros SET precio = new.precio WHERE codigo = new.codigoLibro;
 END;
 //
 DELIMITER ; 
+
+
+insert into ventas(codigolibro, precio, cantidad) values(3, 40, 10);
