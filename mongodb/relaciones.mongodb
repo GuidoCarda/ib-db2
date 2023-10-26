@@ -1,0 +1,109 @@
+use("relaciones");
+
+db.createCollection("usuarios");
+db.createCollection("direcciones");
+
+db.usuarios.insertMany([
+  {
+    fullname: "Juan Perez",
+    age: 30,
+    gender: "Masculino",
+    nationality: "Argentino",
+  },
+  {
+    fullname: "Maria Gomez",
+    age: 45,
+    gender: "Femenino",
+    nationality: "Española",
+  },
+  {
+    fullname: "Joaquin Alvarez",
+    age: 20,
+    gender: "Masculino",
+    nationality: "Colombiano",
+  },
+]);
+
+db.direcciones.insertMany([
+  {
+    fullname: "Juan Perez",
+    block_number: 22,
+    street: "Mitre",
+    city: "Rosario",
+  },
+  {
+    fullname: "Juan Perez",
+    block_number: 500,
+    street: "Pelegrini",
+    city: "Rosario",
+  },
+  {
+    fullname: "Maria Gomez",
+    street: "San Juan",
+    block_number: 42,
+    city: "Barcelona",
+  },
+]);
+
+// Que hace .aggregate en mongodb?
+// .aggregate es un método que permite realizar operaciones de agregación en mongodb.
+
+db.usuarios.aggregate([
+  {
+    $lookup: {
+      from: "direcciones",
+      localField: "fullname",
+      foreignField: "fullname",
+      as: "Domicilio",
+    },
+  },
+]);
+
+// Que hace $unwind en mongodb?
+// $unwind es un operador de agregación que permite desestructurar un array en documentos individuales.
+
+db.usuarios.aggregate([
+  {
+    $lookup: {
+      from: "direcciones",
+      localField: "fullname",
+      foreignField: "fullname",
+      as: "domicilio",
+    },
+  },
+  {
+    $unwind: "$domicilio",
+  },
+]);
+
+// Que hace $project en mongodb?
+// $project es un operador de agregación que permite cambiar la forma en que se muestran los datos.
+
+db.usuarios.aggregate([
+  {
+    $lookup: {
+      from: "direcciones",
+      localField: "fullname",
+      foreignField: "fullname",
+      as: "domicilio",
+    },
+  },
+  {
+    $unwind: "$domicilio",
+  },
+  {
+    $addFields: {
+      street: "$domicilio.street",
+      city: "$domicilio.city",
+    },
+  },
+  {
+    $project: {
+      fullname: 1,
+      age: 1,
+      gender: 1,
+      street: 1,
+      city: 1,
+    },
+  },
+]);

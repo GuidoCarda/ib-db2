@@ -1,0 +1,288 @@
+// Enunciado
+
+// • Se precisa diseñar un blog de noticias donde los usuarios registrados puedan publicar sus comentarios:
+// • Cada autor tiene un nombre de usuario, una cuenta de Twitter y una descripción. Además, de forma opcional, los usuarios pueden proporcionar como datos su dirección postal (calle, número, puerta, C.P., ciudad) o sus teléfonos de contacto (pueden tener varios).
+// • Las noticias tienen un título, un cuerpo y una fecha de publicación. Son publicadas por un autor y pueden contener o no, una lista de tags.
+// 1 - Dibujar la bd con sus colecciones y sus datos
+
+// Usuarios
+// noticias
+// tags
+
+// 2 - Crear la bd en mongodb
+use("blog");
+
+db.createCollection("usuarios");
+// 3 - Crear la colección Usuarios y cargar los datos de tres usuarios, el primero tiene dos teléfonos y el segundo y tercero 3 teléfonos.
+
+db.usuarios.insertMany([
+  {
+    nombre: "Juan",
+    twitter: "JuanTwit",
+    descripcion: "aaa",
+    telefonos: ["73128989", "43278944"],
+    direccion: {
+      calle: "Av. de los Castros",
+      numero: "2256",
+      cp: "39005",
+      ciudad: "Santander",
+    },
+  },
+  {
+    nombre: "Frank",
+    twitter: "Frank_USE",
+    descripcion: "blogger aficionado",
+    telefonos: ["73128989", "43278944", "6536256"],
+    direccion: {
+      calle: "Av. Pelegrini",
+      numero: "300",
+      cp: "39005",
+      ciudad: "Santander",
+    },
+  },
+  {
+    nombre: "Peter",
+    twitter: "Pete",
+    descripcion: "blogger",
+    telefonos: ["808080", "4323424", "423232"],
+    direccion: {
+      calle: "Av. de los Castros",
+      numero: "289s",
+      cp: "39005",
+      ciudad: "Santander",
+    },
+  },
+]);
+
+// 4 - Crear la colección noticias, cargar con 5 noticias. Referenciar a los usuarios cargados.
+
+db.createCollection("noticias");
+
+db.insertMany([
+  {
+    titulo: "Noticia de impacto",
+    cuerpo: "CUERPO DE LA NOTICIA",
+    fecha: "2014-10-21",
+    tags: ["A", "B"],
+    nombreU: "Juan",
+  },
+  {
+    titulo: "Noticia de impacto2",
+    cuerpo: "NOTICIA CB",
+    fecha: "2022-10-21",
+    tags: ["C", "B"],
+    nombreU: "Juan",
+  },
+  {
+    titulo: "Noticia de impacto3",
+    cuerpo: "NOTICIA GB",
+    fecha: "2022-5-21",
+    tags: ["G", "B"],
+    nombreU: "Peter",
+  },
+  {
+    titulo: "Noticia de impacto4",
+    cuerpo: "NOTICIA ZZ",
+    fecha: "2022-5-11",
+    tags: ["Z", "Z"],
+    nombreU: "Peter",
+  },
+  {
+    titulo: "Noticia de impacto5",
+    cuerpo: "NOTICIA xx",
+    fecha: "2021-8-21",
+    tags: ["X", "X"],
+    nombreU: "Frank",
+  },
+]);
+
+// 5  - Mostrar las usuarios con los detalles de las noticias que escribieron, mostrando cada usuario con cada noticia en forma separada.
+
+db.usuarios.aggregate([
+  {
+    $lookup: {
+      from: "noticias",
+      localField: "nombre",
+      foreignField: "nombreU",
+      as: "Noticia",
+    },
+  },
+  {
+    $unwind: "$Noticia",
+  },
+]);
+
+// 6  - Mostrar las usuarios con los detalles de las noticias que escribieron, mostrando cada usuario el listado de todas sus noticias
+
+db.usuarios.aggregate([
+  {
+    $lookup: {
+      from: "noticias",
+      localField: "nombre",
+      foreignField: "nombreU",
+      as: "Noticias",
+    },
+  },
+]);
+
+// 7 - Mostrar nombre de usuario, cuenta de twitter y titulo de la notas que escribio
+
+db.usuarios.aggregate([
+  {
+    $lookup: {
+      from: "noticias",
+      localField: "nombre",
+      foreignField: "nombreU",
+      as: "Noticia",
+    },
+  },
+  {
+    $addFields: {
+      titulo: "$Noticia.titulo",
+    },
+  },
+  {
+    $project: {
+      nombre: 1,
+      twitter: 1,
+      titulo: 1,
+    },
+  },
+]);
+
+// 8 - Mostrar cada una de las noticias con el detalle del usuario que la escribió
+db.noticias.aggregate([
+  {
+    $lookup: {
+      from: "usuarios",
+      localField: "nombreU",
+      foreignField: "nombre",
+      as: "Escritor",
+    },
+  },
+]);
+
+// 8.1 Mostrar solamente el titulo de la noticia, el nombre de usuario que lo escribio y el twitter del mismo
+
+db.noticias.aggregate([
+  {
+    $lookup: {
+      from: "usuarios",
+      localField: "nombreU",
+      foreignField: "nombre",
+      as: "Escritor",
+    },
+  },
+  {
+    $unwind: "$Escritor",
+  },
+  {
+    $addFields: {
+      twitterAutor: "$Escritor.twitter",
+    },
+  },
+  {
+    $project: {
+      titulo: 1,
+      nombreU: 1,
+      twitterAutor: 1,
+    },
+  },
+]);
+
+db.noticias.aggregate([
+  {
+    $lookup: {
+      from: "usuarios",
+      localField: "nombreU",
+      foreignField: "nombre",
+      as: "Escritor",
+    },
+  },
+  {
+    $project: {
+      titulo: 1,
+      nombreAutor: "$Escritor.nombre",
+      twitterAutor: "$Escritor.twitter",
+    },
+  },
+]);
+
+// 9 - Agregar a los documentos de noticias un campo llamado cantidad de palabras y colocarles valores x
+db.noticias.insertMany({}, { $set: { cantidadPalabras: "x" } });
+
+// 10  -Usando la instrucción match, mostrar los datos de Juan.
+db.usuarios.aggregate([
+  {
+    $match: { nombre: "Juan" },
+  },
+]);
+
+db.usuarios.aggregate([
+  {
+    $match: { $or: [{ nombre: "Juan" }, { nombre: "Peter" }] },
+  },
+]);
+
+// 11 - Usando la instrucción match, mostrar los datos de las noticias de Juan.
+db.noticias.aggregate([
+  {
+    $match: { nombreU: "Juan" },
+  },
+]);
+
+// 12 - Mostrar nombre de usuario, cuenta de twitter , titulo de la notas que escribió y la cantidad de palabras escritas de Peter
+db.usuarios.aggregate([
+  {
+    $lookup: {
+      from: "noticias",
+      localField: "nombre",
+      foreignField: "nombreU",
+      as: "Noticia",
+    },
+  },
+  {
+    $unwind: "$Noticia",
+  },
+  {
+    $match: {
+      nombre: "Peter",
+    },
+  },
+  {
+    $project: {
+      twitter: 1,
+      nombreU: "$Noticia.nombreU",
+      titulo: "$Noticia.titulo",
+      cantidadPalabras: "$Noticia.cantidadPalabras",
+    },
+  },
+]);
+
+// 13 - Agregarle las edades a los usuarios con valores numericos aleatorios
+db.usuarios.updateMany({}, { $set: { edad: 0 } });
+
+db.usuarios.updateMany({}, { $set: { edad: Math.random() * 100 } });
+
+db.usuarios.updateMany({}, { $set: { edad: Math.floor(Math.random() * 100) } });
+
+// 13.1 - Mostrar nombre, twitter y edad de los usuarios, ordenados por edad.
+db.usuarios.aggregate([
+  {
+    $sort: { edad: 1 },
+  },
+  {
+    $project: {
+      nombre: 1,
+      twitter: 1,
+      edad: 1,
+    },
+  },
+]);
+
+db.noticias.updateMany(
+  {},
+  { $set: { cantidadPalabras: $cuerpo.split(" ").length } }
+);
+
+// 14 - Mostrar nombre, twitter y edad de los usuarios, ordenados por edad.
