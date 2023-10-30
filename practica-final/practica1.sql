@@ -184,11 +184,20 @@ WHERE presupuesto = (SELECT MIN(presupuesto) FROM departamento)
 
 -- p -Calcula el número de empleados que hay en cada departamento. Tienes que devolver dos columnas, una con el nombre del departamento y otra con el número de empleados que tiene asignados.
 
+-- Se devuelven tambien los departamentos que no tienne empleados asignados con un 0
 SELECT d.nombre as departamento, 
        COUNT(e.codigo) as cantidad_empleados
 FROM departamento d
 LEFT JOIN empleado e ON d.codigo = e.codigo_departamento
 GROUP BY d.codigo
+
+-- Se devuelven solo los departamentos que tienen empleados asignados
+SELECT d.nombre as departamento, 
+       COUNT(e.codigo) as cantidad_empleados
+FROM departamento d
+INNER JOIN empleado e ON d.codigo = e.codigo_departamento
+GROUP BY d.codigo
+
 
 -- q-Calcula el número de empleados que trabajan en cada unos de los departamentos que tienen un presupuesto mayor a 200000 euros.
 SELECT d.nombre as departamento,
@@ -198,6 +207,8 @@ FROM departamento d
 LEFT JOIN empleado e ON d.codigo = e.codigo_departamento
 WHERE d.presupuesto > 200000
 GROUP BY d.codigo
+
+
 
 -- r -Devuelve un listado con todos los empleados que tiene el departamento de Sistemas. (Sin utilizar INNER JOIN).
 
@@ -242,11 +253,58 @@ WHERE codigo IN (SELECT codigo_departamento FROM empleado WHERE codigo_departame
 
 
 -- v- Crear procedimiento que muestre la cantidad de empleados que hay en la bd
--- w- Crear procedimiento que muestre la cantidad de empleados del departamento Sistemas
--- x- Crear un procedimiento almacenado que ingrese un nuevo departamento
--- z - Crear una vista que muestre apellido1  y nombre de los empleados ordenados por apellido
--- a2 -  Crear una vista que muestre apellido1, nombre y nombre del departamento de los empleados ordenados por apellido
+DELIMITER //
+CREATE PROCEDURE obtener_total_empleados()
+BEGIN 
+  SELECT count(codigo) as total_empleados FROM empleado;
+END
+//
+DELIMITER ;
 
+CALL obtener_total_empleados;
+
+
+-- w- Crear procedimiento que muestre la cantidad de empleados del departamento Sistemas
+DELIMITER //
+CREATE PROCEDURE total_empleados_sistemas()
+BEGIN 
+  SELECT count(empleado.codigo) as total
+  FROM empleado
+  INNER JOIN departamento ON empleado.codigo_departamento = departamento.codigo
+  WHERE departamento.nombre like '%sistemas';
+END
+//
+DELIMITER ;
+
+CALL total_empleados_sistemas;
+
+-- x- Crear un procedimiento almacenado que ingrese un nuevo departamento
+DELIMITER //
+CREATE PROCEDURE crear_departamento(IN nombre VARCHAR(100), IN presupuesto DOUBLE, IN gastos DOUBLE)
+BEGIN 
+  INSERT INTO departamento (nombre, presupuesto, gastos) VALUES (nombre, presupuesto, gastos);
+END
+//
+DELIMITER ;
+
+CALL crear_departamento('Gestion de proyectos', 2000, 0);
+
+
+-- z - Crear una vista que muestre apellido1  y nombre de los empleados ordenados por apellido
+CREATE VIEW empleados_ord_apellido AS
+SELECT apellido1, nombre 
+FROM empleado
+ORDER BY apellido1;
+
+-- z2 -  Crear una vista que muestre apellido1, nombre y nombre del departamento de los empleados ordenados por apellido
+
+CREATE VIEW empleados_departamento_ord_apellido AS
+SELECT e.apellido1,
+       e.nombre,
+       d.nombre as departamento
+FROM empleado e
+INNER JOIN departamento d ON e.codigo_departamento = d.codigo
+ORDER BY e.apellido1;
 
 
 
