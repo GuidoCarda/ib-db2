@@ -136,7 +136,30 @@ SELECT * FROM datos_secciones;
 -- 8 - Modificar el sueldo agregado a la vista anterior asignándole $800. Que sucede en la tabla
 
 
--- 9 - Modificar el sueldo de la tabla secciones del código 1 a $900 de sueldo. Qué sucede con la vista?
+SELECT * FROM secciones;
+SELECT * FROM datos_secciones;
 
- 
+UPDATE datos_secciones SET sueldo = 800 WHERE codigo = 4;
+
+SELECT * FROM secciones;
+SELECT * FROM datos_secciones;
+
+-- La tabla original se ve afectada
+
+-- 9 - Modificar el sueldo de la tabla secciones del código 1 a $900 de sueldo. Qué sucede con la vista?
+SELECT * FROM secciones;
+SELECT * FROM datos_secciones;
+
+UPDATE secciones SET sueldo = 900 WHERE codigo = 1;
+
+SELECT * FROM secciones;
+SELECT * FROM datos_secciones;
+
 -- 10 - Mostrar la vista sumandole a los sueldos 100$
+
+SELECT *,
+       sueldo + 100
+FROM datos_secciones;
+
+SELECT * FROM secciones;
+SELECT * FROM datos_secciones;
