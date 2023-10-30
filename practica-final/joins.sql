@@ -75,4 +75,12 @@ SELECT *
 FROM departamento
 RIGHT JOIN empleado ON departamento.id = empleado.id_departamento
 
+SELECT * 
+FROM empleado e1
+LEFT JOIN departamento d1 ON e1.id_departamento = d1.id 
+UNION
+SELECT * 
+FROM empleado e2
+RIGHT JOIN departamento d2 ON  e2.id_departamento = d2.id 
+
 
