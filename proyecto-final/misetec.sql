@@ -1,67 +1,79 @@
 CREATE DATABASE misetec;
 USE misetec;
 
-CREATE TABLE tipo_servicio(
+CREATE TABLE service_type(
   id int primary key auto_increment,
-  denominacion varchar(50) NOT NULL,
-  descripcion varchar(255)
+  denomination varchar(50),
+  `description` varchar(255)
 );
 
-CREATE TABLE estado_orden(
+CREATE TABLE order_status(
   id int primary key auto_increment,
-  denominacion varchar(30) NOT NULL
+  denomination varchar(30)
 );
 
-CREATE TABLE equipo(
+CREATE TABLE device(
   id int primary key auto_increment,
-  marca varchar(50),
-  modelo varchar(50),
-  tipo varchar(50),
-  nro_serie varchar(50) 
+  brand varchar(50),
+  model varchar(50),
+  `type` varchar(50),
+  serial_number varchar(50)
 );
 
-CREATE TABLE orden(
+CREATE TABLE client(
   id int primary key auto_increment,
-  fecha_creacion date NOT NULL,
-  fecha_finalizacion date,
-  falla_equipo varchar(255),
-  accesorios varchar(255),
-  informe varchar(255),
-  tipo_servicio_id int,
-  equipo_id int,
-  cliente_id int,
-  personal_id int,
-  foreign key (tipo_servicio_id) references tipo_servicio(id),
-  foreign key (equipo_id) references equipo(id),
-  foreign key (cliente_id) references cliente(id),
-  foreign key (personal_id) references personal(id)
+  firstname varchar(50),
+  lastname varchar(50),
+  email varchar(50),
+  `address` varchar(50),
+  phone_number varchar(20),
+  postal_code varchar(10)
 );
 
-CREATE TABLE cliente(
+CREATE TABLE staff(
   id int primary key auto_increment,
-  nombre varchar(50),
-  apellido varchar(50),
-  email varchar(50) NOT NULL,
-  direccion varchar(50),
-  telefono varchar(20),
-  codigo_postal varchar(10)
+  firstname varchar(50),
+  lastname varchar(50),
+  username varchar(50),
+  `password` varchar(50)
 );
 
-CREATE TABLE personal(
+CREATE TABLE order(
   id int primary key auto_increment,
-  nombre varchar(50),
-  apellido varchar(50),
-  nombre_usuario varchar(50),
-  contrasenia varchar(50)
+  created_at date,
+  finished_at date,
+  `description` varchar(255),
+  device_failure varchar(255),
+  accesories varchar(255),
+  report varchar(255),
+  service_type_id int,
+  status_id int,
+  device_id int,
+  client_id int,
+  staff_id int,
+  foreign key (service_type_id) references service_type(id),
+  foreign key (status_id) references order_status(id),
+  foreign key (device_id) references device(id),
+  foreign key (client_id) references client(id),
+  foreign key (staff_id) references staff(id)
 );
 
-INSERT INTO estado_orden (denominacion) 
+INSERT INTO order_status (denomination) 
 VALUES ('sin revisar'),
-       ('en reparación'),
-       ('reparación terminada'),
-       ('pendiente de aprobación de garantía'),
-       ('cambiar en garantía'),
-       ('emitir nota de crédito');
+       ('en espera'),
+       ('en progreso'),
+       ('cancelada'),
+       ('finalizada');
       
+/*
+Consultar.
+-- Cuando setear campos a NOT NULL?
+-- Conviene usar TEXT en lugar de VARCHAR(255) para las descripciones y reportes?
+-- En el caso que quiera tener un historial de actualizaciones. Como lo podria implementar?
+-- Es decir guardar la fecha de cada cambio de estado.
+
+-- Trigger con tabla temporal?
+-- Cuando se de un update en la tabla ORDER que se almacene la fecha y hora junto a la actualizacion dada?
+*/
 
 
