@@ -177,10 +177,49 @@ db.amigos.updateOne(
 );
 
 // 20 - Modificar el documento anterior eliminando los campos que tiene agregando solamente la profesión de Desarrollador (tener en cuenta que tenemos que mantener nombre y apellido)
+
+db.amigos.updateOne(
+  { Apellidos: "Perez" },
+  {
+    $unset: {},
+    $set: { Profesion: "Desarrollador" },
+  }
+);
+
 // 21 - Eliminar el último documento creado
+
+db.amigos.find({}).sort({ _id: -1 }).limit(1);
+
+db.amigos.deleteOne({ Apellido: "Perez" });
+
 // 22 - Mostrar los nombres de las personas de este documento junto a la ciudad donde viven
+db.amigos.find({}, { Nombre: 1, "direccion.ciudad": 1 });
+
+db.amigos.aggregate([
+  {
+    $project: {
+      Nombre: 1,
+      Ciudad: "$direccion.ciudad",
+    },
+  },
+]);
+
 // 23 - Agregarle a los documentos de las personas que son de Rosario, el campo “Habitantes:2000000”
 
+db.amigos.update(
+  { "direccion.ciudad": "Rosario" },
+  {
+    $set: {
+      "direccion.habitantes": 2000000,
+    },
+  }
+);
+
 // 24 - Modificar las edades de las personas registrados en el documento aumentando la edad en 1
+db.amigos.updateMany({}, { $inc: { Edad: 1 } });
+
 // 25 - Mostrar los documentos ordenados de menor a mayor por edades
+db.amigos.find({}).sort({ Edad: -1 });
+
 // 26 - Mostrar los campos nombre y edad de los documentos ordenados de mayor a menor por edades
+db.amigos.find({}, { Nombre: 1, Apellidos: 1, Edad: 1 }).sort({ Edad: -1 });
