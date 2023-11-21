@@ -169,17 +169,101 @@ db.noticias.aggregate([
 
 // 9 - Agregar a los documentos de noticias un campo llamado cantidad de palabras y colocarles valores x
 
-db.noticias.aggregate([
+db.noticias.updateMany({}, [
   {
     $addFields: {
-      cantidadCaracteres: { $strLenCP: "$cuerpo" },
+      cantidadPalabras: {
+        $size: { $split: ["$cuerpo", " "] },
+      },
     },
   },
 ]);
 
 // 10  -Usando la instrucción match, mostrar los datos de Juan.
+db.usuarios.aggregate([
+  {
+    $match: {
+      nombre: "Juan",
+    },
+  },
+]);
+
+db.usuarios.find({ nombre: "Juan" });
+
 // 10.1 -Usando la instrucción match, mostrar los datos de Juan, mostrando nombre de usuario, cuenta de twitter y titulo de la notas que escribio
+
+db.usuarios.aggregate([
+  {
+    $lookup: {
+      from: "noticias",
+      localField: "nombre",
+      foreignField: "nombreU",
+      as: "noticias",
+    },
+  },
+  {
+    $match: {
+      nombre: "Juan",
+    },
+  },
+  {
+    $project: {
+      nombre: 1,
+      twitter: 1,
+      noticias: "$noticias.titulo",
+    },
+  },
+]);
+
 // 11 - Usando la instrucción match, mostrar los datos de las noticias de Juan.
+
+db.noticias.aggregate([
+  {
+    $match: {
+      nombreU: "Juan",
+    },
+  },
+]);
+
 // 12 - Mostrar nombre de usuario, cuenta de twitter , titulo de la notas que escribió y la cantidad de palabras escritas de Peter
+
+db.usuarios.aggregate([
+  {
+    $lookup: {
+      from: "noticias",
+      localField: "nombre",
+      foreignField: "nombreU",
+      as: "Noticias",
+    },
+  },
+  {
+    $match: {
+      nombre: "Peter",
+    },
+  },
+  {
+    $project: {
+      nombre: 1,
+      twitter: 1,
+      noticias: "$Noticias.titulo",
+      totalPalabras: {
+        $sum: "$Noticias.cantidadPalabras",
+      },
+    },
+  },
+]);
+
 // 13 - Agregarle las edades a los usuarios
+db.usuarios.updateMany({}, [
+  {
+    $set: {
+      edad: {
+        $floor: { $multiply: [100, { $rand: {} }] },
+      },
+    },
+  },
+]);
+
 // 14 - Mostrar nombre, twitter y edad de los usuarios, ordenados por edad.
+
+db.usuarios.find({}, { nombre: 1, twitter: 1, edad }).sort({ edad: -1 });
