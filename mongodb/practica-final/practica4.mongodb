@@ -1,0 +1,300 @@
+// Usando MongoDB representar el siguiente problema
+// Una entidad educativa cuenta con la siguiente información:
+
+// Un alumno  (Núm_Matrícula, Nombre, edad) puede estar matriculado de una o varias de las tres materias  (codigo, Nombre, salón) que tiene la entidad educativa.
+// En una materia habrá como mínimo 3 y como máximo 15 alumnos.
+// Una materia es impartida por un único profesor  (Id_P, Nombre, Especialidad(puede tener más de una especialidad), Teléfono). Un profesor podrá impartir varias materias.
+
+// Crear la BD
+use("escuela");
+// Crear las colecciones.
+
+// alumno
+//   matricula
+//   nombre
+//   edad
+
+// materias
+//  codigo
+//  nombre
+//  salon
+//  profesor
+
+// profesor
+//   codigo
+//   nombre
+//   especialidad []
+//   telefono
+
+// Cargar los documentos de las mismas
+
+// ALumnos: Juan Perez, 21/ Marta Gomez,19/ Pedro Antenor, 21/ Mara Liz, 20 / Luis Gonzalez,20/ Tomás Lopez, 20/ Ana Top, 20
+
+db.createCollection("alumno");
+
+db.alumno.insertMany([
+  {
+    matricula: 1,
+    nombre: "Juan Perez",
+    edad: 21,
+  },
+  {
+    matricula: 2,
+    nombre: "Marta Gomez",
+    edad: 19,
+  },
+  {
+    matricula: 3,
+    nombre: "Pedro Antenor",
+    edad: 21,
+  },
+  {
+    matricula: 4,
+    nombre: "Mara Liz",
+    edad: 20,
+  },
+  {
+    matricula: 5,
+    nombre: "Luis Gonzalez",
+    edad: 20,
+  },
+  {
+    matricula: 6,
+    nombre: "Tomas Lopez",
+    edad: 20,
+  },
+  {
+    matricula: 7,
+    nombre: "Ana Top",
+    edad: 20,
+  },
+]);
+
+// Profesor: Dario Mene, Matematico y Programador - Juana Mora, Programadora
+
+db.profesor.insertMany([
+  {
+    codigo: 1,
+    nombre: "Dario Mene",
+    especialidad: ["Matematico", "Programador"],
+    telefono: "123456",
+  },
+  {
+    codigo: 2,
+    nombre: "Juana Mora",
+    especialidad: ["Programador"],
+    telefono: "453456",
+  },
+]);
+
+// materias: Matemática(3 alumnos), Programación(4 alumnos), Lógica(3 alumnos)
+
+db.materia.insertMany([
+  {
+    codigo: 1,
+    nombre: "Matemática",
+    salon: "A",
+    alumnos: ["Luis Gonzales", "Tomas Lopez", "Ana Top"],
+    profesor: "Dario Mene",
+  },
+  {
+    codigo: 2,
+    nombre: "Programación",
+    salon: "B",
+    alumnos: ["Juan Perez", "Marta Gomez", "Pedro Antenor", "Mara Liz"],
+    profesor: "Juana Mora",
+  },
+  {
+    codigo: 3,
+    nombre: "Lógica",
+    salon: "C",
+    alumnos: ["Juan Perez", "Marta Gomez", "Pedro Antenor"],
+    profesor: "Dario Mene",
+  },
+]);
+// (Tener en cuenta que en la colección materias se debe encontrar los nombres de los alumnos que la cursan y el nombre del docente)
+// Insertar una materia más.
+
+db.materia.insertOne({
+  codigo: 4,
+  nombre: "Física",
+  salon: "D",
+  alumnos: ["Juan Perez", "Marta Gomez"],
+  profesor: "Dario Mene",
+});
+
+// Agregar a las materias el campo nroAlumnos.
+db.materia.updateMany({}, [
+  {
+    $addFields: { nroAlumnos: { $size: "$alumnos" } },
+  },
+]);
+
+// Contar y mostrar la cantidad de alumnos de cada materia y cargar uno por uno de las cantidades
+db.materia.updateMany({}, { $set: { nroAlumnos: { $size: "$alumnos" } } });
+
+// Mostrar el listado de materias que tienen mas de 3 alumnos
+db.materia.find({
+  nroAlumnos: {
+    $gt: 3,
+  },
+});
+
+// Mostrar el listado de materias que tienen mas de 3 alumnos y cuyo profesor es Dario Mene
+
+db.materia.find({ nroAlumnos: { $gt: 3 }, profesor: "Dario Mene" });
+
+// Mostrar los nombres de los alumnos mayores a 20 años
+db.alumno.find({ edad: { $gt: 20 } });
+
+// Agregar un docente con solamente los campos id y nombre
+db.profesor.insertOne({
+  id: 3,
+  nombre: "Guido Carda",
+});
+
+// Mostrar los docentes sin especialidad
+db.profesor.find({ especialidad: { $exists: false } });
+
+// Mostrar los docentes que son matemáticos
+db.profesor.find({ especialidad: "Matematico" });
+
+// Modificar el nombre y apellido del primer alumno por Juan Mercado
+db.alumno.updateOne({}, { $set: { nombre: "Juan Mercado" } });
+
+// Agregarle a todos los docentes la especialidad “Docente”
+db.profesor.updateMany({}, { $push: { especialidad: "Docente" } });
+
+// Mostrar los alumnos ordenados por edades
+db.alumno.find({}).sort({ edad: -1 });
+
+// Mostrar los nombres de las materias y el detalle de los alumnos (nombre y edad)
+db.materia.aggregate([
+  {
+    $lookup: {
+      from: "alumno",
+      localField: "alumnos",
+      foreignField: "nombre",
+      as: "alumnos",
+    },
+  },
+  { $unwind: "$alumnos" },
+  {
+    $project: {
+      nombre: 1,
+      alumno: {
+        nombre: "$alumnos.nombre",
+        edad: "$alumnos.edad",
+      },
+    },
+  },
+]);
+
+// Mostrar los profesores junto a la información de las materias y la cantidad de alumnos de las mismas que dicta
+
+db.profesor.aggregate([
+  {
+    $lookup: {
+      from: "materia",
+      localField: "nombre",
+      foreignField: "profesor",
+      as: "materias",
+    },
+  },
+  {
+    $unwind: "$materias",
+  },
+  {
+    $project: {
+      nombre: 1,
+      materia: "$materias.nombre",
+      alumnos: "$materias.nroAlumnos",
+    },
+  },
+]);
+
+db.profesor.aggregate([
+  {
+    $lookup: {
+      from: "materia",
+      localField: "nombre",
+      foreignField: "profesor",
+      as: "materias",
+    },
+  },
+  {
+    $addFields: {
+      cantidadAlumnosACargo: { $sum: "$materias.nroAlumnos" },
+    },
+  },
+  {
+    $project: {
+      nombre: 1,
+      materias: "$materias.nombre",
+      cantidadAlumnosACargo: 1,
+    },
+  },
+]);
+
+// Mostrar los nombres de los  profesores junto los nombres de las materias que dicta
+db.profesor.aggregate([
+  {
+    $lookup: {
+      from: "materia",
+      localField: "nombre",
+      foreignField: "profesor",
+      as: "materias",
+    },
+  },
+  {
+    $project: {
+      nombre: 1,
+      materias: "$materias.nombre",
+    },
+  },
+]);
+
+// Mostrar las materias dadas por un profesor X(Usar Match)
+
+db.materia.aggregate([
+  {
+    $match: { profesor: "Dario Mene" },
+  },
+  { $project: { nombre: 1 } },
+]);
+
+// Contar la cantidad de materias donde trabaja el profesor X
+
+db.materia.aggregate([
+  {
+    $match: {
+      profesor: "Dario Mene",
+    },
+  },
+  {
+    $count: "materias",
+  },
+]);
+
+// Crear un indice en la tabla Materias por cantidades de alumnos en forma ascendente
+db.materia.createIndex({ nroAlumnos: -1 });
+
+//  Crear un indice en la tabla Materias indexando por nombre de materias y nombre de alumnos. Colocarle el nombre MateriasyAlumnos
+db.materia.createIndex("MateriasyAlumnos", {
+  nombre: 1,
+  alumnos: 1,
+});
+
+//  Agregarle el campo dni a los docentes.
+db.profesor.updateMany({}, [
+  {
+    $set: {
+      dni: {
+        $multiply: [8],
+      },
+    },
+  },
+]);
+
+// Crea un indice en el campo dni de los docentes, éste debe ser único
+db.profesor.createIndex({ dni: 1 }, { unique: true });
