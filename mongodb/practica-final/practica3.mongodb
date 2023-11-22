@@ -267,3 +267,108 @@ db.usuarios.updateMany({}, [
 // 14 - Mostrar nombre, twitter y edad de los usuarios, ordenados por edad.
 
 db.usuarios.find({}, { nombre: 1, twitter: 1, edad }).sort({ edad: -1 });
+
+// practica
+
+db.noticias.find({
+  $or: [{ cantidadPalabras: { $eq: 2 } }, { cantidadPalabras: { $eq: 2 } }],
+});
+
+db.noticias.find({
+  $or: [{ cantidadPalabras: { $eq: 2 } }, { nombre: "Juan" }],
+});
+
+db.noticias.find({
+  $and: [{ cantidadPalabras: 2 }, { nombre: "Peter" }],
+});
+
+db.noticias.find({
+  cantidadPalabras: 2,
+  nombre: "Peter",
+});
+
+// Nombre de usuario junto a los tags que contienen sus noticias y su titulo
+db.usuarios.aggregate([
+  {
+    $lookup: {
+      from: "noticias",
+      localField: "nombre",
+      foreignField: "nombreU",
+      as: "Noticias",
+    },
+  },
+  {
+    $unwind: "$Noticias",
+  },
+  {
+    $project: {
+      nombre: 1,
+      noticia: "$Noticias.titulo",
+      tags: "$Noticias.tags",
+    },
+  },
+]);
+
+// Mostrar la cantida de palabras que tiene cada noticia
+
+db.noticias.aggregate([
+  {
+    $addFields: {
+      palabras: {
+        $size: { $split: ["$cuerpo", " "] },
+      },
+    },
+  },
+  {
+    $project: {
+      nombreU: 1,
+      titulo: 1,
+      palabras: 1,
+    },
+  },
+]);
+
+// Agregar numero aleatorio a la noticia
+db.noticias.updateMany({}, [
+  {
+    $addFields: {
+      aleatorio: {
+        $multiply: [{ $rand: {} }, 200],
+      },
+    },
+  },
+]);
+
+// Eliminar campo de todos los documentos
+db.noticias.updateMany({}, [
+  {
+    $unset: "aleatorio",
+  },
+]);
+
+db.noticias.updateMany({}, { $unset: { aleatorio: 0 } });
+
+//Agregar numero aleatorio en rango a un campo nuevo de la noticia
+// rango 3000 - 7000
+// lower limit 3000
+// diference 7000 - 3000 = 4000
+
+db.noticias.updateMany({}, [
+  {
+    $addFields: {
+      aleatorioEnRango: {
+        $round: {
+          $add: [
+            3000, // lower limit
+            { $multiply: [4000, { $rand: {} }] },
+          ],
+        },
+      },
+    },
+  },
+]);
+
+db.noticias.aggregate([
+  { $match: { nombreU: "Juan" } },
+  { $count: "noticias" },
+]);

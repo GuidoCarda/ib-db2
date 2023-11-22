@@ -223,3 +223,51 @@ db.amigos.find({}).sort({ Edad: -1 });
 
 // 26 - Mostrar los campos nombre y edad de los documentos ordenados de mayor a menor por edades
 db.amigos.find({}, { Nombre: 1, Apellidos: 1, Edad: 1 }).sort({ Edad: -1 });
+
+// 27 - Mostrar nombre y edad de los documentos que contengan las siguientes aficiones ['culturismo', 'senderismo']
+
+db.amigos.find(
+  { Aficiones: { $in: ["culturismo", "senderismo"] } },
+  { Nombre: 1, Edad: 1 }
+);
+
+// 28 - Mostrar nombre y edad de los documentos que no contengan las siguientes aficiones ['senderismo', 'tenis']
+
+db.amigos.find(
+  { Aficiones: { $nin: ["senderismo", "tenis"] } },
+  { Nombre: 1, Edad: 1 }
+);
+
+db.amigos.updateOne(
+  { Nombre: "Joaquin", Apellidos: "Rodriguez" },
+  {
+    Aficiones: { $push: "pintura" },
+  }
+);
+
+// Eliminar todos los campos de "Rodiguez" y agregar profesion: "desarrollador"
+db.amigos.updateOne(
+  { Apellidos: "Rodriguez" },
+  {
+    $unset: {
+      Nombre: {},
+      Apellidos: {},
+      Edad: {},
+      Aficiones: {},
+      telefonos: {},
+      direccion: {},
+      Amigos: {},
+    },
+    $set: { Profesion: "Desarrollador" },
+  }
+);
+
+// Eliminar la aficion 'senderismo' a todos los documentos
+
+db.amigos.find({ Aficiones: "senderismo" });
+db.amigos.updateMany(
+  { Aficiones: "senderismo" },
+  { $pull: { Aficiones: "senderismo" } }
+);
+
+db.amigos.updateMany({}, { $push: { Aficiones: "senderismo" } });
